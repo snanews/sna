@@ -1,9 +1,10 @@
+<!-- 頂部導覽列 -->
 <div class="top-bar">
   <!-- 左側三個斜線選單按鈕 -->
-  <button class="menu-btn" id="menu-btn" aria-label="選單">
+  <button class="menu-btn" id="menu-btn" aria-label="開啟選單">
     <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round">
-      <line x1="4" y1="6" x2="20" y2="10"></line>
-      <line x1="4" y1="12" x2="20" y2="14"></line>
+      <line x1="4" y1="6" x2="20" y2="6"></line>
+      <line x1="4" y1="12" x2="20" y2="12"></line>
       <line x1="4" y1="18" x2="20" y2="18"></line>
     </svg>
   </button>
@@ -30,3 +31,48 @@
   <a href="#" class="category-tab">校園</a>
   <a href="#" class="category-tab">其他</a>
 </nav>
+
+<!-- ==========================================================================
+   左側抽屜選單 (Side Drawer) 與遮罩
+   ========================================================================== -->
+<div class="drawer-overlay" id="drawer-overlay"></div>
+
+<aside class="side-drawer" id="side-drawer">
+  <div class="drawer-header">
+    <span class="drawer-title">選單 Navigator</span>
+    <button class="drawer-close-btn" id="drawer-close-btn" aria-label="關閉選單">
+      <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <line x1="18" y1="6" x2="6" y2="18"></line>
+        <line x1="6" y1="6" x2="18" y2="18"></line>
+      </svg>
+    </button>
+  </div>
+
+  <nav class="drawer-nav">
+    <ul class="drawer-menu">
+      <li class="drawer-item"><a href="index.html" class="drawer-link active">首頁</a></li>
+      <li class="drawer-item"><a href="#" class="drawer-link">所有新聞</a></li>
+      <li class="drawer-item"><a href="#" class="drawer-link">常用表件</a></li>
+      
+      <li class="drawer-divider"></li>
+      
+      <li class="drawer-section-label">新聞分類</li>
+      <li class="drawer-item"><a href="#" class="drawer-link">自治議題</a></li>
+      <li class="drawer-item"><a href="#" class="drawer-link">學權權益</a></li>
+      <li class="drawer-item"><a href="#" class="drawer-link">校園生活</a></li>
+      <li class="drawer-item"><a href="#" class="drawer-link">其他報導</a></li>
+
+      <li class="drawer-divider"></li>
+
+      <li class="drawer-section-label">關於我們</li>
+      <li class="drawer-item"><a href="#" class="drawer-link">社團簡介與組織章程</a></li>
+      <li class="drawer-item"><a href="#" class="drawer-link">勘誤與新聞倫理規範</a></li>
+    </ul>
+  </nav>
+
+  <div class="drawer-footer">
+    <p>松山新聞社 SNA © 2026</p>
+  </div>
+</aside>
+
+
