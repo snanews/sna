@@ -1,5 +1,5 @@
 // 你的 Google Apps Script Web App 部署完整網址
-const GAS_API_URL = "https://script.google.com/macros/s/AKfycby6pULHa_sTORND-VBwHgn0Mme_V0UaYK2j8l5KQx2Gdt8R3qAcmpQq_C59BnUMUF_B/exec";
+const GAS_API_URL = "https://script.google.com/macros/s/AKfycbz8a-8nnSWZipJXa0xmlUEcRv6kgpUwLeaof1c99wb3DPcmixXNyO4IbnuoeUqQOaq-/exec";
 
 document.addEventListener("DOMContentLoaded", async () => {
   // 1. 載入共用頁首與頁尾
