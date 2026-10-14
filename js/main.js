@@ -3,8 +3,11 @@ document.addEventListener("DOMContentLoaded", async () => {
   await loadComponent("site-header-container", "components/header.html");
   await loadComponent("site-footer-container", "components/footer.html");
 
-  // 2. 初始化深淺色模式邏輯（必須在 header 載入之後，否則抓不到按鈕 ID）
+  // 2. 初始化深淺色模式
   initThemeSwitcher();
+
+  // 3. 初始化左側抽屜選單
+  initSideDrawer();
 });
 
 // 輔助函式：用來非同步載入 HTML 組件
@@ -23,7 +26,6 @@ async function loadComponent(containerId, filePath) {
 function initThemeSwitcher() {
   const themeToggleBtn = document.getElementById("theme-toggle");
   
-  // 檢查並載入預設主題
   const savedTheme = localStorage.getItem("theme");
   const systemPrefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
   
@@ -35,7 +37,6 @@ function initThemeSwitcher() {
     document.documentElement.setAttribute("data-theme", "light");
   }
 
-  // 綁定點擊事件
   if (themeToggleBtn) {
     themeToggleBtn.addEventListener("click", () => {
       const currentTheme = document.documentElement.getAttribute("data-theme");
@@ -45,6 +46,30 @@ function initThemeSwitcher() {
       localStorage.setItem("theme", newTheme);
     });
   }
+}
+
+// 左側抽屜選單互動邏輯
+function initSideDrawer() {
+  const menuBtn = document.getElementById("menu-btn");
+  const closeBtn = document.getElementById("drawer-close-btn");
+  const overlay = document.getElementById("drawer-overlay");
+  const drawer = document.getElementById("side-drawer");
+
+  function openDrawer() {
+    drawer.classList.add("active");
+    overlay.classList.add("active");
+    document.body.style.overflow = "hidden"; // 禁止背景滾動
+  }
+
+  function closeDrawer() {
+    drawer.classList.remove("active");
+    overlay.classList.remove("active");
+    document.body.style.overflow = ""; // 恢復背景滾動
+  }
+
+  if (menuBtn) menuBtn.addEventListener("click", openDrawer);
+  if (closeBtn) closeBtn.addEventListener("click", closeDrawer);
+  if (overlay) overlay.addEventListener("click", closeDrawer);
 }
 
 
