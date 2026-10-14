@@ -8,84 +8,48 @@
 </head>
 <body>
 
-  <!-- 頁首容器：會由 JS 自動載入 components/header.html -->
+  <!-- 頁首容器 -->
   <header id="site-header-container" class="site-header"></header>
 
   <!-- 主要內容區塊 -->
   <main class="container">
 
-    <!-- 本週焦點新聞 (Featured Article) -->
-    <section class="section-block">
-      <div class="featured-card">
-        <a href="#">
-          <div class="featured-img-wrapper">
-            <img src="https://via.placeholder.com/800x450" alt="本週焦點新聞圖片">
-          </div>
-          <div class="featured-content">
-            <span class="featured-tag">本週焦點</span>
-            <h1 class="featured-title">新聞標題：關於學生議會本學期預算審查之追蹤報導</h1>
-            <div class="featured-meta">2026/10/14 · SNA 新聞組</div>
-          </div>
-        </a>
-      </div>
+    <!-- 本週焦點新聞容器 -->
+    <section class="section-block" id="featured-container">
+      <!-- JS 會自動把最新文章渲染到這裡 -->
     </section>
 
-    <!-- 第一區：推薦內容 (熱門點閱) -->
+    <!-- 第一區：推薦內容容器 (熱門點閱) -->
     <section class="section-block">
       <h2 class="section-title">推薦內容</h2>
-      <div class="news-grid">
-        <article class="news-card">
-          <img src="https://via.placeholder.com/100x75" alt="縮圖" class="news-card-img">
-          <div class="news-card-body">
-            <h3 class="news-card-title"><a href="#">熱門報導：校園社團活動經費撥補常見疑義解答</a></h3>
-            <span class="news-card-meta">2026/10/12 · 點閱 320 次</span>
-          </div>
-        </article>
-        <article class="news-card">
-          <img src="https://via.placeholder.com/100x75" alt="縮圖" class="news-card-img">
-          <div class="news-card-body">
-            <h3 class="news-card-title"><a href="#">專題評析：學生權益問卷調查結果全貌解析</a></h3>
-            <span class="news-card-meta">2026/10/10 · 點閱 280 次</span>
-          </div>
-        </article>
+      <div class="news-grid" id="recommended-container">
+        <!-- JS 會自動將高點閱文章渲染到這裡 -->
       </div>
     </section>
 
-    <!-- 第二區：學權內容 -->
+    <!-- 第二區：學權內容容器 -->
     <section class="section-block">
       <h2 class="section-title">學權專區</h2>
-      <div class="news-grid">
-        <article class="news-card">
-          <img src="https://via.placeholder.com/100x75" alt="縮圖" class="news-card-img">
-          <div class="news-card-body">
-            <h3 class="news-card-title"><a href="#">學權深角：服儀規範修訂提案最新進展總整理</a></h3>
-            <span class="news-card-meta">2026/10/08 · SNA 學權組</span>
-          </div>
-        </article>
+      <div class="news-grid" id="rights-container">
+        <!-- JS 會自動篩選學權分類渲染到這裡 -->
       </div>
     </section>
 
-    <!-- 第三區：公告 -->
+    <!-- 第三區：公告容器 -->
     <section class="section-block">
       <h2 class="section-title">社內公告</h2>
-      <div class="announcement-list">
-        <div class="announcement-item">
-          <span class="announcement-date">2026-10-14</span>
-          <a href="#" class="announcement-title">【社務公告】松山新聞社官網測試版正式上線測試</a>
-        </div>
-        <div class="announcement-item">
-          <span class="announcement-date">2026-10-01</span>
-          <a href="#" class="announcement-title">【勘誤聲明】針對上期學生會選舉報導數據修正</a>
-        </div>
+      <div class="announcement-list" id="announcement-container">
+        <!-- JS 會自動將公告清單渲染到這裡 -->
       </div>
     </section>
 
   </main>
 
-  <!-- 頁尾容器：會由 JS 自動載入 components/footer.html -->
+  <!-- 頁尾容器 -->
   <footer id="site-footer-container" class="site-footer"></footer>
 
-  <script src="js/main.js"></script>
+  <!-- 載入首頁專屬 JS -->
+  <script src="js/index.js"></script>
 </body>
 </html>
 
