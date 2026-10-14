@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="zh-TW" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>文章內頁 - 松山新聞社 SNA</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/article.css">
+</head>
+<body>
+
+  <!-- 頁首容器 (路徑注意因為在 pages 資料夾內，所以向上找一層) -->
+  <header id="site-header-container" class="site-header"></header>
+
+  <!-- 文章內頁主要容器 -->
+  <main class="container article-container">
+    
+    <!-- 文章標題與詮釋資料 -->
+    <header class="article-header">
+      <span class="article-category-tag">自治議題</span>
+      <h1 class="article-title">關於學生議會本學期預算審查之追蹤報導：檢視各社團經費配置與核销爭議</h1>
+      <div class="article-meta">
+        <span>發布時間：2026-10-14 08:30</span>
+        <span>作者：SNA 編輯部</span>
+      </div>
+    </header>
+
+    <!-- 積木渲染容器：後台的 JSON 積木會自動在這裡像拼積木一樣展開 -->
+    <div class="article-content-blocks" id="article-blocks">
+      <!-- 暫時用範例積木呈現結構，未來會由 JS 動態塞入 -->
+      
+      <!-- 1. 段落積木範例 -->
+      <p class="block-text">
+        松山高中第14屆學生議會於本週展開新一會期的預算審查程序。本次審查重點聚焦於各大型社團活動補助款之合理性，以及過去經費核銷程序中存在的行政延宕問題……
+      </p>
+
+      <!-- 2. 圖片積木範例 -->
+      <figure class="block-image">
+        <img src="https://via.placeholder.com/800x450" alt="議會審查現場">
+        <figcaption>圖：學生議會審查會議進行中，議員針對預算表件進行逐條質詢。（松山新聞社資料照）</figcaption>
+      </figure>
+
+      <!-- 3. 引言積木範例 -->
+      <blockquote class="block-quote">
+        「行政必須公開，程序必須正義。我們不允許任何一筆學生自治經費流於不明。」—— 議會代表發言
+      </blockquote>
+
+      <!-- 4. 段落積木範例 -->
+      <p class="block-text">
+        後續本社將持續追蹤各項修正案的表決結果，並針對「常用表件」專區的最新申辦格式進行滾動式更新，讀者可隨時透過側邊選單查閱最新進度。
+      </p>
+
+    </div>
+
+    <!-- 文章底部資訊／標籤 -->
+    <footer class="article-footer-info">
+      <div class="article-tags">
+        <span>#學生議會</span>
+        <span>#預算審查</span>
+        <span>#學權自治</span>
+      </div>
+    </footer>
+
+  </main>
+
+  <!-- 頁尾容器 -->
+  <footer id="site-footer-container" class="site-footer"></footer>
+
+  <!-- 共用 JS (需支援跨層級路徑載入) -->
+  <script src="../js/article.js"></script>
+</body>
+</html>
+
