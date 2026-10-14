@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="zh-TW" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>松山新聞社 SNA</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- 頂部導覽與分類列 -->
+  <header class="site-header">
+    <div class="top-bar">
+      <!-- 左側三個斜線選單 (選單 Icon) -->
+      <button class="menu-btn" id="menu-btn" aria-label="選單">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round">
+          <line x1="4" y1="6" x2="20" y2="10"></line>
+          <line x1="4" y1="12" x2="20" y2="14"></line>
+          <line x1="4" y1="18" x2="20" y2="18"></line>
+        </svg>
+      </button>
+
+      <!-- 中間品牌 LOGO / 站名 -->
+      <a href="index.html" class="site-logo">松山新聞社</a>
+
+      <!-- 右側深淺色切換按鈕 -->
+      <div class="header-actions">
+        <button class="theme-toggle-btn" id="theme-toggle" aria-label="切換深淺色模式">
+          <!-- 太陽/月亮 示意圖標 (SVG) -->
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="5"></circle>
+            <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- 分類標籤列 -->
+    <nav class="category-nav">
+      <a href="#" class="category-tab active">首頁</a>
+      <a href="#" class="category-tab">自治</a>
+      <a href="#" class="category-tab">學權</a>
+      <a href="#" class="category-tab">校園</a>
+      <a href="#" class="category-tab">其他</a>
+    </nav>
+  </header>
+
+  <!-- 主要內容區塊 -->
+  <main class="container">
+
+    <!-- 本週焦點新聞 (Featured Article) -->
+    <section class="section-block">
+      <div class="featured-card">
+        <a href="#">
+          <div class="featured-img-wrapper">
+            <!-- 預設占位圖或報導圖片 -->
+            <img src="https://via.placeholder.com/800x450" alt="本週焦點新聞圖片">
+          </div>
+          <div class="featured-content">
+            <span class="featured-tag">本週焦點</span>
+            <h1 class="featured-title">新聞標題：關於學生議會本學期預算審查之追蹤報導</h1>
+            <div class="featured-meta">2026/10/14 · SNA 新聞組</div>
+          </div>
+        </a>
+      </div>
+    </section>
+
+    <!-- 第一區：推薦內容 (熱門點閱) -->
+    <section class="section-block">
+      <h2 class="section-title">推薦內容</h2>
+      <div class="news-grid">
+        <article class="news-card">
+          <img src="https://via.placeholder.com/100x75" alt="縮圖" class="news-card-img">
+          <div class="news-card-body">
+            <h3 class="news-card-title"><a href="#">熱門報導：校園社團活動經費撥補常見疑義解答</a></h3>
+            <span class="news-card-meta">2026/10/12 · 點閱 320 次</span>
+          </div>
+        </article>
+        <article class="news-card">
+          <img src="https://via.placeholder.com/100x75" alt="縮圖" class="news-card-img">
+          <div class="news-card-body">
+            <h3 class="news-card-title"><a href="#">專題評析：學生權益問卷調查結果全貌解析</a></h3>
+            <span class="news-card-meta">2026/10/10 · 點閱 280 次</span>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- 第二區：學權內容 -->
+    <section class="section-block">
+      <h2 class="section-title">學權專區</h2>
+      <div class="news-grid">
+        <article class="news-card">
+          <img src="https://via.placeholder.com/100x75" alt="縮圖" class="news-card-img">
+          <div class="news-card-body">
+            <h3 class="news-card-title"><a href="#">學權深角：服儀規範修訂提案最新進展總整理</a></h3>
+            <span class="news-card-meta">2026/10/08 · SNA 學權組</span>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- 第三區：公告 -->
+    <section class="section-block">
+      <h2 class="section-title">社內公告</h2>
+      <div class="announcement-list">
+        <div class="announcement-item">
+          <span class="announcement-date">2026-10-14</span>
+          <a href="#" class="announcement-title">【社務公告】松山新聞社官網測試版正式上線測試</a>
+        </div>
+        <div class="announcement-item">
+          <span class="announcement-date">2026-10-01</span>
+          <a href="#" class="announcement-title">【勘誤聲明】針對上期學生會選舉報導數據修正</a>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- 頁尾區塊 -->
+  <footer class="site-footer">
+    <p>© 2026 松山新聞社 Songshan News Agency. All Rights Reserved.</p>
+  </footer>
+
+  <script src="js/main.js"></script>
+</body>
+</html>
+
