@@ -1,0 +1,108 @@
+/* ==========================================================================
+   文章內頁排版與積木樣式
+   ========================================================================== */
+.article-container {
+  max-width: 720px; /* 內頁閱讀寬度稍微收窄，提升文字舒適度 */
+  margin: 32px auto;
+  padding: 0 16px;
+}
+
+.article-header {
+  margin-bottom: 24px;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 20px;
+}
+
+.article-category-tag {
+  display: inline-block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #ffffff;
+  background-color: var(--accent-color);
+  padding: 3px 10px;
+  border-radius: 4px;
+  margin-bottom: 12px;
+}
+
+.article-title {
+  font-size: 1.6rem;
+  font-weight: 700;
+  line-height: 1.4;
+  margin-bottom: 12px;
+}
+
+.article-meta {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  display: flex;
+  gap: 16px;
+}
+
+/* 核心積木渲染區塊 */
+.article-content-blocks {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* 1. 文字積木 */
+.block-text {
+  font-size: 1.05rem;
+  line-height: 1.8;
+  color: var(--text-primary);
+}
+
+/* 2. 圖片積木 */
+.block-image {
+  margin: 8px 0;
+}
+
+.block-image img {
+  width: 100%;
+  border-radius: 8px;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  background-color: var(--bg-secondary);
+}
+
+.block-image figcaption {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-top: 8px;
+  text-align: center;
+}
+
+/* 3. 引言積木 */
+.block-quote {
+  border-left: 4px solid var(--accent-color);
+  background-color: var(--bg-secondary);
+  padding: 16px 20px;
+  margin: 12px 0;
+  font-size: 1.05rem;
+  font-style: italic;
+  color: var(--text-secondary);
+  border-radius: 0 8px 8px 0;
+}
+
+/* 文章底部標籤與資訊 */
+.article-footer-info {
+  margin-top: 40px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border-color);
+}
+
+.article-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.article-tags span {
+  font-size: 0.85rem;
+  color: var(--accent-color);
+  background-color: var(--bg-secondary);
+  padding: 4px 10px;
+  border-radius: 16px;
+  font-weight: 500;
+}
+
