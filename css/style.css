@@ -10,8 +10,9 @@
   --text-secondary: #666666;
   --text-muted: #8e8e93;
   --border-color: #e5e5ea;
-  --accent-color: #0066cc;
-  --accent-hover: #0052a3;
+  /* 主視覺色彩調整為 #075c40 */
+  --accent-color: #075c40;
+  --accent-hover: #054530;
   --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.05);
   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
@@ -25,8 +26,9 @@
   --text-secondary: #b0b0b0;
   --text-muted: #777777;
   --border-color: #333333;
-  --accent-color: #4da6ff;
-  --accent-hover: #80c0ff;
+  /* 深色模式下提升主視覺對比度 */
+  --accent-color: #128a62;
+  --accent-hover: #1ab07d;
   --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.5);
 }
@@ -80,7 +82,7 @@ a {
   padding: 0 16px;
 }
 
-/* 左側三個斜線選單按鈕 (用純 SVG 繪製) */
+/* 左側三個斜線選單按鈕 */
 .menu-btn {
   background: none;
   border: none;
@@ -200,8 +202,8 @@ a {
   display: inline-block;
   font-size: 0.75rem;
   font-weight: 600;
-  color: var(--accent-color);
-  background-color: var(--bg-secondary);
+  color: #ffffff;
+  background-color: var(--accent-color);
   padding: 2px 8px;
   border-radius: 4px;
   margin-bottom: 8px;
@@ -294,7 +296,7 @@ a {
 
 /* ==========================================================================
    7. 頁尾 (Footer)
-   */
+   ========================================================================== */
 .site-footer {
   margin-top: 40px;
   padding: 24px 16px;
@@ -317,4 +319,10 @@ a {
     font-size: 1.5rem;
   }
 }
+```eof
+
+已將全站的主視覺色彩更新為深綠色 `#075c40`！在深色模式下，我也調整成了適度的綠色以維持足夠的文字與對比度閱讀體驗。
+
+接下來，我們要處理 **「Header 與 Footer 抽離成獨立檔案」**，還是要先做 **「側邊選單點擊展開」** 的效果呢？
+
 
