@@ -1,0 +1,320 @@
+/* ==========================================================================
+   1. 深淺色模式變數 (Theme Variables)
+   ========================================================================== */
+:root {
+  /* 預設淺色模式 (Light Mode) */
+  --bg-primary: #ffffff;
+  --bg-secondary: #f4f6f8;
+  --bg-card: #ffffff;
+  --text-primary: #1a1a1a;
+  --text-secondary: #666666;
+  --text-muted: #8e8e93;
+  --border-color: #e5e5ea;
+  --accent-color: #0066cc;
+  --accent-hover: #0052a3;
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="dark"] {
+  /* 深色模式 (Dark Mode) */
+  --bg-primary: #121212;
+  --bg-secondary: #1e1e1e;
+  --bg-card: #252525;
+  --text-primary: #f0f0f0;
+  --text-secondary: #b0b0b0;
+  --text-muted: #777777;
+  --border-color: #333333;
+  --accent-color: #4da6ff;
+  --accent-hover: #80c0ff;
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+/* ==========================================================================
+   2. 全域基礎樣式
+   ========================================================================== */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans TC", sans-serif;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.6;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.container {
+  width: 100%;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+/* ==========================================================================
+   3. 頁首與導覽列 (Header & Category Bar)
+   ========================================================================== */
+.site-header {
+  position: sticky;
+  top: 0;
+  background-color: var(--bg-primary);
+  border-bottom: 1px solid var(--border-color);
+  z-index: 100;
+  transition: background-color 0.3s ease;
+}
+
+.top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 56px;
+  padding: 0 16px;
+}
+
+/* 左側三個斜線選單按鈕 (用純 SVG 繪製) */
+.menu-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.menu-btn svg {
+  width: 24px;
+  height: 24px;
+  stroke: currentColor;
+}
+
+.site-logo {
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+}
+
+/* 深淺色切換按鈕 */
+.theme-toggle-btn {
+  background: none;
+  border: none;
+  color: var(--text-primary);
+  cursor: pointer;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 分類標籤列 */
+.category-nav {
+  display: flex;
+  overflow-x: auto;
+  white-space: nowrap;
+  padding: 8px 16px;
+  border-top: 1px solid var(--border-color);
+  scrollbar-width: none; /* Firefox 隱藏滾動條 */
+}
+
+.category-nav::-webkit-scrollbar {
+  display: none; /* Chrome/Safari 隱藏滾動條 */
+}
+
+.category-tab {
+  padding: 6px 16px;
+  margin-right: 8px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  border-radius: 20px;
+  transition: all 0.2s ease;
+}
+
+.category-tab.active,
+.category-tab:hover {
+  color: #ffffff;
+  background-color: var(--accent-color);
+}
+
+/* ==========================================================================
+   4. 區塊通用樣式 (Section Layout)
+   ========================================================================== */
+.section-block {
+  margin: 24px 0;
+}
+
+.section-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  border-left: 4px solid var(--accent-color);
+  padding-left: 8px;
+}
+
+/* ==========================================================================
+   5. 本週焦點新聞 (Featured Hero Section)
+   ========================================================================== */
+.featured-card {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  background-color: var(--bg-card);
+  box-shadow: var(--shadow-md);
+}
+
+.featured-img-wrapper {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background-color: var(--bg-secondary);
+  overflow: hidden;
+}
+
+.featured-img-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.featured-content {
+  padding: 16px;
+}
+
+.featured-tag {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--accent-color);
+  background-color: var(--bg-secondary);
+  padding: 2px 8px;
+  border-radius: 4px;
+  margin-bottom: 8px;
+}
+
+.featured-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1.4;
+  margin-bottom: 8px;
+}
+
+.featured-meta {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+/* ==========================================================================
+   6. 文章卡片與清單 (Cards & Lists)
+   ========================================================================== */
+.news-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+.news-card {
+  display: flex;
+  gap: 12px;
+  background-color: var(--bg-card);
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 12px;
+}
+
+.news-card-img {
+  width: 100px;
+  height: 75px;
+  border-radius: 8px;
+  object-fit: cover;
+  background-color: var(--bg-secondary);
+  flex-shrink: 0;
+}
+
+.news-card-body {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.news-card-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--text-primary);
+}
+
+.news-card-meta {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+/* 公告清單樣式 */
+.announcement-list {
+  background-color: var(--bg-secondary);
+  border-radius: 8px;
+  padding: 8px 16px;
+}
+
+.announcement-item {
+  padding: 10px 0;
+  border-bottom: 1px dashed var(--border-color);
+  display: flex;
+  flex-direction: column;
+}
+
+.announcement-item:last-child {
+  border-bottom: none;
+}
+
+.announcement-date {
+  font-size: 0.75rem;
+  color: var(--accent-color);
+  font-weight: 600;
+}
+
+.announcement-title {
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+/* ==========================================================================
+   7. 頁尾 (Footer)
+   ========================================================================== */
+.site-footer {
+  margin-top: 40px;
+  padding: 24px 16px;
+  background-color: var(--bg-secondary);
+  border-top: 1px solid var(--border-color);
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+/* ==========================================================================
+   8. 電腦版響應式適配 (Desktop RWD)
+   ========================================================================== */
+@media (min-width: 768px) {
+  .news-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .featured-title {
+    font-size: 1.5rem;
+  }
+}
+
