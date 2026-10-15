@@ -3,8 +3,8 @@ const GAS_API_URL = "https://script.google.com/macros/s/AKfycbz8a-8nnSWZipJXa0xm
 
 document.addEventListener("DOMContentLoaded", async () => {
   // 1. 載入共用頁首與頁尾（路徑需往上一層 ../）
-  await loadComponent("site-header-container", "../components/header.html");
-  await loadComponent("site-footer-container", "../components/footer.html");
+  await loadComponent("site-header-container", "components/header.html");
+  await loadComponent("site-footer-container", "components/footer.html");
 
   // 2. 初始化深淺色模式與抽屜選單
   initThemeSwitcher();
