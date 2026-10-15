@@ -1,8 +1,8 @@
 // 你的 Google Apps Script Web App 部署完整網址
-const GAS_API_URL = "https://script.google.com/macros/s/AKfycbz8a-8nnSWZipJXa0xmlUEcRv6kgpUwLeaof1c99wb3DPcmixXNyO4IbnuoeUqQOaq-/exec";
+const GAS_API_URL = "https://script.google.com/macros/s/AKfycby6pULHa_sTORND-VBwHgn0Mme_V0UaYK2j8l5KQx2Gdt8R3qAcmpQq_C59BnUMUF_B/exec";
 
 document.addEventListener("DOMContentLoaded", async () => {
-  // 1. 載入共用頁首與頁尾（路徑需往上一層 ../）
+  // 1. 動態載入共用頁首與頁尾（自動適應 GitHub Pages 路徑）
   await loadComponent("site-header-container", "components/header.html");
   await loadComponent("site-footer-container", "components/footer.html");
 
@@ -18,7 +18,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 async function fetchAndRenderArticleDetail() {
   const container = document.getElementById("article-main-container");
   
-  // 取得網址參數，例如 ?id=post_001 或 ?short=sn-140
   const urlParams = new URLSearchParams(window.location.search);
   const articleId = urlParams.get("id");
   const shortCode = urlParams.get("short");
@@ -37,8 +36,6 @@ async function fetchAndRenderArticleDetail() {
     }
 
     const articles = result.articles || [];
-    
-    // 依據 id 或 short_code 尋找該篇文章
     const article = articles.find(item => item.id === articleId || item.short_code === shortCode);
 
     if (!article) {
@@ -62,15 +59,13 @@ async function fetchAndRenderArticleDetail() {
     if (blocksContainer && article.layout_json) {
       let blocks = [];
       try {
-        // 將試算表裡儲存的 JSON 字串轉成物件陣列
         blocks = typeof article.layout_json === "string" ? JSON.parse(article.layout_json) : article.layout_json;
       } catch (e) {
         console.error("layout_json 格式錯誤，無法解析:", e);
-        blocksContainer.innerHTML = `<p style="color: red;">文章排版資料解析失敗。</p>`;
+        blocksContainer.innerHTML = `<p style="color: red; text-align: center; padding: 20px;">文章排版資料解析失敗。</p>`;
         return;
       }
 
-      // 逐個積木渲染
       blocksContainer.innerHTML = blocks.map(block => {
         if (block.type === "text") {
           return `<p class="block-text">${block.content}</p>`;
@@ -94,11 +89,15 @@ async function fetchAndRenderArticleDetail() {
   }
 }
 
-// 輔助函式：非同步載入組件
+// 智慧路徑組件載入函式（完美適配 GitHub Pages /sna/ 子目錄）
 async function loadComponent(containerId, filePath) {
   try {
-    const response = await fetch(filePath);
-    if (!response.ok) throw new Error(`無法載入 ${filePath}`);
+    const isGitHubPages = window.location.hostname.includes("github.io");
+    const basePath = isGitHubPages ? "/sna/" : "/";
+    const fullPath = filePath.startsWith("/") ? filePath : basePath + filePath;
+
+    const response = await fetch(fullPath);
+    if (!response.ok) throw new Error(`無法載入 ${fullPath} (狀態碼: ${response.status})`);
     const html = await response.text();
     document.getElementById(containerId).innerHTML = html;
   } catch (error) {
