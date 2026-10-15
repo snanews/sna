@@ -50,7 +50,7 @@ function renderFeaturedArticle(articles) {
 
   container.innerHTML = `
     <div class="featured-card">
-      <a href="pages/article.html?id=${latest.id}">
+      <a href="article.html?id=${item.id}">
         <div class="featured-img-wrapper">
           <img src="${latest.cover_image || 'https://via.placeholder.com/800x450'}" alt="${latest.title}">
         </div>
