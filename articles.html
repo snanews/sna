@@ -4,12 +4,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>文章內頁 - 松山新聞社 SNA</title>
-  <link rel="stylesheet" href="../css/style.css">
-  <link rel="stylesheet" href="../css/article.css">
+  <!-- 因為在根目錄，直接抓 css/ -->
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/article.css">
 </head>
 <body>
 
-  <!-- 頁首容器 (跨層級載入 components/header.html) -->
+  <!-- 頁首容器 -->
   <header id="site-header-container" class="site-header"></header>
 
   <!-- 文章內頁主要容器 -->
@@ -24,10 +25,10 @@
       </div>
     </header>
 
-    <!-- 積木渲染容器：後台的 JSON 積木會自動在這裡像拼積木一樣展開 -->
-    <div class="article-content-blocks" id="article-blocks">
+    <!-- 積木渲染容器 -->
+    <main class="article-content-blocks" id="article-blocks">
       <p style="color: var(--text-muted); text-align: center; padding: 20px;">正在讀取報導內容與積木排版...</p>
-    </div>
+    </main>
 
     <!-- 文章底部資訊／標籤 -->
     <footer class="article-footer-info">
@@ -40,12 +41,10 @@
 
   </main>
 
-  <!-- 頁尾容器 (跨層級載入 components/footer.html) -->
+  <!-- 頁尾容器 -->
   <footer id="site-footer-container" class="site-footer"></footer>
 
-  <!-- 專屬的文章內頁動態渲染 JS -->
-  <script src="../js/article.js"></script>
+  <!-- 載入根目錄下的 article.js -->
+  <script src="js/article.js"></script>
 </body>
 </html>
-
-
