@@ -4,22 +4,23 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>松山新聞社 SNA</title>
+  <!-- 根目錄下的樣式表 -->
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
-  <!-- 頁首容器 -->
+  <!-- 頁首容器：由 js/index.js 自動載入 components/header.html -->
   <header id="site-header-container" class="site-header"></header>
 
   <!-- 主要內容區塊 -->
   <main class="container">
 
-    <!-- 本週焦點新聞容器 -->
+    <!-- 本週焦點新聞容器 (自動渲染最新一篇) -->
     <section class="section-block" id="featured-container">
-      <!-- JS 會自動把最新文章渲染到這裡 -->
+      <!-- JS 會自動將焦點新聞渲染到這裡 -->
     </section>
 
-    <!-- 第一區：推薦內容容器 (熱門點閱) -->
+    <!-- 第一區：推薦內容容器 (自動依點閱率排序) -->
     <section class="section-block">
       <h2 class="section-title">推薦內容</h2>
       <div class="news-grid" id="recommended-container">
@@ -27,7 +28,7 @@
       </div>
     </section>
 
-    <!-- 第二區：學權內容容器 -->
+    <!-- 第二區：學權內容容器 (自動篩選學權分類) -->
     <section class="section-block">
       <h2 class="section-title">學權專區</h2>
       <div class="news-grid" id="rights-container">
@@ -45,10 +46,10 @@
 
   </main>
 
-  <!-- 頁尾容器 -->
+  <!-- 頁尾容器：由 js/index.js 自動載入 components/footer.html -->
   <footer id="site-footer-container" class="site-footer"></footer>
 
-  <!-- 載入首頁專屬 JS -->
+  <!-- 載入根目錄下的首頁專屬 JS -->
   <script src="js/index.js"></script>
 </body>
 </html>
