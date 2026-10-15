@@ -1,8 +1,8 @@
 // 你的 Google Apps Script Web App 部署完整網址
-const GAS_API_URL = "https://script.google.com/macros/s/AKfycbz8a-8nnSWZipJXa0xmlUEcRv6kgpUwLeaof1c99wb3DPcmixXNyO4IbnuoeUqQOaq-/exec";
+const GAS_API_URL = "https://script.google.com/macros/s/AKfycby6pULHa_sTORND-VBwHgn0Mme_V0UaYK2j8l5KQx2Gdt8R3qAcmpQq_C59BnUMUF_B/exec";
 
 document.addEventListener("DOMContentLoaded", async () => {
-  // 1. 載入共用頁首與頁尾
+  // 1. 動態載入共用頁首與頁尾（自動適應 GitHub Pages 路徑）
   await loadComponent("site-header-container", "components/header.html");
   await loadComponent("site-footer-container", "components/footer.html");
 
@@ -50,7 +50,7 @@ function renderFeaturedArticle(articles) {
 
   container.innerHTML = `
     <div class="featured-card">
-      <a href="article.html?id=${item.id}">
+      <a href="article.html?id=${latest.id}">
         <div class="featured-img-wrapper">
           <img src="${latest.cover_image || 'https://via.placeholder.com/800x450'}" alt="${latest.title}">
         </div>
@@ -64,20 +64,19 @@ function renderFeaturedArticle(articles) {
   `;
 }
 
-// B. 推薦內容：自動依 views 點閱率由高到低排序取前 2~4 篇
+// B. 推薦內容：自動依 views 點閱率由高到低排序取前 4 篇
 function renderRecommendedArticles(articles) {
   const container = document.getElementById("recommended-container");
   if (!container || articles.length === 0) return;
 
-  // 依照點閱率 views 由大到小排序
   const sorted = [...articles].sort((a, b) => Number(b.views || 0) - Number(a.views || 0));
-  const topArticles = sorted.slice(0, 4); // 取前 4 名
+  const topArticles = sorted.slice(0, 4);
 
   container.innerHTML = topArticles.map(item => `
     <article class="news-card">
       <img src="${item.cover_image || 'https://via.placeholder.com/100x75'}" alt="縮圖" class="news-card-img">
       <div class="news-card-body">
-        <h3 class="news-card-title"><a href="pages/article.html?id=${item.id}">${item.title}</a></h3>
+        <h3 class="news-card-title"><a href="article.html?id=${item.id}">${item.title}</a></h3>
         <span class="news-card-meta">${item.publish_date} · 點閱 ${item.views || 0} 次</span>
       </div>
     </article>
@@ -100,7 +99,7 @@ function renderRightsArticles(articles) {
     <article class="news-card">
       <img src="${item.cover_image || 'https://via.placeholder.com/100x75'}" alt="縮圖" class="news-card-img">
       <div class="news-card-body">
-        <h3 class="news-card-title"><a href="pages/article.html?id=${item.id}">${item.title}</a></h3>
+        <h3 class="news-card-title"><a href="article.html?id=${item.id}">${item.title}</a></h3>
         <span class="news-card-meta">${item.publish_date} · ${item.author || 'SNA 學權組'}</span>
       </div>
     </article>
@@ -120,11 +119,15 @@ function renderAnnouncements(announcements) {
   `).join('');
 }
 
-// 輔助函式：非同步載入組件
+// 智慧路徑組件載入函式（完美適配 GitHub Pages /sna/ 子目錄）
 async function loadComponent(containerId, filePath) {
   try {
-    const response = await fetch(filePath);
-    if (!response.ok) throw new Error(`無法載入 ${filePath}`);
+    const isGitHubPages = window.location.hostname.includes("github.io");
+    const basePath = isGitHubPages ? "/sna/" : "/";
+    const fullPath = filePath.startsWith("/") ? filePath : basePath + filePath;
+
+    const response = await fetch(fullPath);
+    if (!response.ok) throw new Error(`無法載入 ${fullPath} (狀態碼: ${response.status})`);
     const html = await response.text();
     document.getElementById(containerId).innerHTML = html;
   } catch (error) {
@@ -179,4 +182,5 @@ function initSideDrawer() {
   if (closeBtn) closeBtn.addEventListener("click", closeDrawer);
   if (overlay) overlay.addEventListener("click", closeDrawer);
 }
+
 
