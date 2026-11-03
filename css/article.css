@@ -1,108 +1,139 @@
 /* ==========================================================================
-   文章內頁排版與積木樣式
+   文章內頁排版與積木樣式 (對齊 js/article.js 專屬版)
    ========================================================================== */
 .article-container {
-  max-width: 720px; /* 內頁閱讀寬度稍微收窄，提升文字舒適度 */
-  margin: 32px auto;
-  padding: 0 16px;
+  max-width: 760px; /* 舒適的閱讀寬度 */
+  margin: 48px auto 80px auto;
+  padding: 0 20px;
 }
 
 .article-header {
-  margin-bottom: 24px;
+  margin-bottom: 36px;
   border-bottom: 1px solid var(--border-color);
-  padding-bottom: 20px;
+  padding-bottom: 24px;
 }
 
 .article-category-tag {
   display: inline-block;
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   font-weight: 600;
   color: #ffffff;
-  background-color: var(--accent-color);
-  padding: 3px 10px;
-  border-radius: 4px;
-  margin-bottom: 12px;
+  background-color: var(--primary-color, #107c41);
+  padding: 4px 12px;
+  border-radius: 6px;
+  margin-bottom: 14px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
 }
 
 .article-title {
-  font-size: 1.6rem;
+  font-size: 2.2rem;
   font-weight: 700;
-  line-height: 1.4;
-  margin-bottom: 12px;
+  line-height: 1.35;
+  color: var(--text-main);
+  margin-bottom: 14px;
 }
 
 .article-meta {
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   color: var(--text-muted);
   display: flex;
   gap: 16px;
+  align-items: center;
 }
 
-/* 核心積木渲染區塊 */
+/* 核心積木渲染區塊容器 */
 .article-content-blocks {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 28px; /* 增加區塊間距，提升閱讀呼吸感 */
 }
 
-/* 1. 文字積木 */
-.block-text {
+/* 1. 文字積木 (.article-paragraph) */
+.article-paragraph {
   font-size: 1.05rem;
-  line-height: 1.8;
-  color: var(--text-primary);
+  line-height: 1.9;
+  color: var(--text-main);
+  white-space: pre-wrap;
 }
 
-/* 2. 圖片積木 */
-.block-image {
-  margin: 8px 0;
-}
-
-.block-image img {
-  width: 100%;
-  border-radius: 8px;
-  aspect-ratio: 16 / 9;
-  object-fit: cover;
-  background-color: var(--bg-secondary);
-}
-
-.block-image figcaption {
-  font-size: 0.85rem;
-  color: var(--text-muted);
-  margin-top: 8px;
+/* 2. 圖片積木 (.article-figure) */
+.article-figure {
+  margin: 20px 0;
   text-align: center;
 }
 
-/* 3. 引言積木 */
-.block-quote {
-  border-left: 4px solid var(--accent-color);
-  background-color: var(--bg-secondary);
-  padding: 16px 20px;
-  margin: 12px 0;
+.article-figure img {
+  width: 100%;
+  max-height: 500px;
+  border-radius: 12px;
+  object-fit: cover;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+}
+
+.article-figure figcaption {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin-top: 10px;
+  text-align: center;
+}
+
+/* 3. 引言積木 (.article-quote) */
+.article-quote {
+  border-left: 5px solid var(--primary-color, #107c41);
+  background-color: var(--bg-card);
+  padding: 22px 26px;
+  margin: 20px 0;
   font-size: 1.05rem;
   font-style: italic;
-  color: var(--text-secondary);
-  border-radius: 0 8px 8px 0;
+  color: var(--text-main);
+  border-radius: 0 12px 12px 0;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.03);
+  border-top: 1px solid var(--border-color);
+  border-right: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.article-quote p {
+  margin-bottom: 8px;
+  line-height: 1.6;
+}
+
+.article-quote cite {
+  display: block;
+  font-size: 0.9rem;
+  font-style: normal;
+  color: var(--text-muted);
+  text-align: right;
+  font-weight: 500;
 }
 
 /* 文章底部標籤與資訊 */
 .article-footer-info {
-  margin-top: 40px;
-  padding-top: 20px;
+  margin-top: 48px;
+  padding-top: 24px;
   border-top: 1px solid var(--border-color);
 }
 
 .article-tags {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 10px;
 }
 
 .article-tags span {
   font-size: 0.85rem;
-  color: var(--accent-color);
-  background-color: var(--bg-secondary);
-  padding: 4px 10px;
-  border-radius: 16px;
+  color: var(--primary-color, #107c41);
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  padding: 6px 14px;
+  border-radius: 20px;
   font-weight: 500;
+  transition: all 0.2s ease;
 }
 
+.article-tags span:hover {
+  border-color: var(--primary-color, #107c41);
+  background-color: var(--bg-main);
+}

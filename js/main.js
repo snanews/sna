@@ -11,12 +11,41 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 
 // 輔助函式：用來非同步載入 HTML 組件
+// 升級版：自動修正 Header/Footer 內部相對連結的路徑組件載入函式
 async function loadComponent(containerId, filePath) {
   try {
-    const response = await fetch(filePath);
-    if (!response.ok) throw new Error(`無法載入 ${filePath}`);
+    const isGitHubPages = window.location.hostname.includes("github.io");
+    const basePath = isGitHubPages ? "/sna/" : "/";
+    
+    let fullPath = filePath;
+    if (!filePath.startsWith("../") && !filePath.startsWith("/")) {
+      fullPath = basePath + filePath;
+    }
+
+    const response = await fetch(fullPath);
+    if (!response.ok) throw new Error(`無法載入 ${fullPath}`);
     const html = await response.text();
-    document.getElementById(containerId).innerHTML = html;
+    const container = document.getElementById(containerId);
+    
+    if (container) {
+      container.innerHTML = html;
+
+      // 關鍵修復：如果是載入 Header，自動校正所有指向 index.html 的連結
+      if (containerId === "site-header-container") {
+        const logoLink = container.querySelector(".site-logo");
+        const homeTab = container.querySelector(".category-tab[href='index.html']");
+        const drawerHome = container.querySelector(".drawer-link[href='index.html']");
+
+        // 計算回到根目錄的首頁相對路徑（例如在子資料夾就用 '../index.html'，在根目錄就用 'index.html'）
+        const relativeHomePath = window.location.pathname.includes("/admin/") || window.location.pathname.includes("/articles/")
+          ? "../index.html" 
+          : "index.html";
+
+        if (logoLink) logoLink.setAttribute("href", relativeHomePath);
+        if (homeTab) homeTab.setAttribute("href", relativeHomePath);
+        if (drawerHome) drawerHome.setAttribute("href", relativeHomePath);
+      }
+    }
   } catch (error) {
     console.error("載入組件失敗:", error);
   }

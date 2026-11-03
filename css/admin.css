@@ -1,0 +1,195 @@
+/* ==========================================
+   SNA 新聞發布後台專屬樣式表 (admin.css)
+   ========================================== */
+
+.admin-container {
+  max-width: 800px;
+  margin: 40px auto 80px auto;
+  padding: 0 20px;
+}
+
+.admin-header-box {
+  margin-bottom: 30px;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 20px;
+}
+
+.admin-title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: 8px;
+}
+
+.admin-desc {
+  font-size: 0.95rem;
+  color: var(--text-muted);
+}
+
+.admin-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 30px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
+  margin-bottom: 24px;
+}
+
+.form-group {
+  margin-bottom: 22px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--text-main);
+}
+
+.form-control {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: var(--bg-main);
+  color: var(--text-main);
+  font-size: 1rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-control::placeholder {
+  color: var(--text-muted);
+  opacity: 0.7;
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: #107c41;
+  box-shadow: 0 0 0 3px rgba(16, 124, 65, 0.2);
+}
+
+/* 讓文字輸入框自動撐開高度，並關閉右下角手動調整大小的功能 */
+textarea.form-control {
+  resize: none; /* 關閉右下角的手動拉伸圖示 */
+  overflow-y: hidden; /* 隱藏預設滾動條，靠 JS 自動撐開 */
+  min-height: 90px;
+  line-height: 1.5;
+}
+
+/* 解決下拉選單在暗色模式下反白看不清楚的問題 */
+select.form-control {
+  background-color: var(--bg-main) !important;
+  color: var(--text-main) !important;
+}
+
+select.form-control option {
+  background-color: var(--bg-card) !important;
+  color: var(--text-main) !important;
+  padding: 10px;
+}
+
+.block-item {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  padding: 20px;
+  border-radius: 10px;
+  margin-bottom: 16px;
+  position: relative;
+}
+
+.block-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.95rem;
+  transition: background 0.2s, opacity 0.2s, transform 0.1s;
+}
+
+.btn:hover { opacity: 0.95; }
+.btn:active { transform: scale(0.98); }
+
+/* 主發布按鈕高質感優化 */
+.btn-primary.submit-btn-override { 
+  background-color: #1b5e20 !important; /* 使用沉穩專業的深綠色 */
+  color: #ffffff !important; 
+  width: 100% !important; 
+  padding: 14px !important; 
+  font-size: 1.05rem !important; 
+  border-radius: 10px !important;
+  box-shadow: 0 4px 14px rgba(27, 94, 32, 0.3) !important;
+  display: block !important;
+  text-align: center !important;
+}
+
+.btn-primary.submit-btn-override:hover {
+  background-color: #144e19 !important;
+}
+
+.btn-secondary { 
+  background: var(--bg-main); 
+  border: 1px solid var(--border-color); 
+  color: var(--text-main); 
+  margin-right: 10px; 
+}
+
+.btn-secondary:hover { background: var(--border-color); }
+
+.btn-danger { 
+  background: #fee2e2; 
+  color: #dc2626; 
+  padding: 6px 12px; 
+  font-size: 0.85rem; 
+  border-radius: 6px; 
+}
+
+.btn-danger:hover { background: #fecaca; }
+
+[data-theme="dark"] .btn-danger {
+  background: rgba(239, 68, 68, 0.2);
+  color: #f87171;
+}
+
+[data-theme="dark"] .btn-danger:hover {
+  background: rgba(239, 68, 68, 0.3);
+}
+
+/* 自訂置中彈窗樣式優化 */
+.modal-overlay {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0, 0, 0, 0.6); display: flex; align-items: center; justify-content: center;
+  z-index: 1000; opacity: 0; pointer-events: none; transition: opacity 0.2s ease;
+  backdrop-filter: blur(4px);
+}
+
+.modal-overlay.active { opacity: 1; pointer-events: auto; }
+
+.modal-box {
+  background: var(--bg-card); border: 1px solid var(--border-color); padding: 32px;
+  border-radius: 16px; width: 90%; max-width: 420px; text-align: center;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+}
+
+.modal-title { font-size: 1.35rem; font-weight: 700; margin-bottom: 12px; color: var(--text-main); }
+.modal-desc { font-size: 0.95rem; color: var(--text-muted); margin-bottom: 28px; line-height: 1.6; }
+.modal-actions { display: flex; justify-content: center; gap: 12px; }
+.modal-actions .btn { min-width: 110px; }
+
+/* 彈窗內的確認按鈕強制樣式，解決太淡看不見的問題 */
+.modal-actions .btn-primary {
+  background-color: #1b5e20 !important;
+  color: #ffffff !important;
+  border: none !important;
+  box-shadow: 0 2px 8px rgba(27, 94, 32, 0.25) !important;
+}

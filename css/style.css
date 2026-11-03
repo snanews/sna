@@ -57,7 +57,7 @@ a {
 
 .container {
   width: 100%;
-  max-width: 1000px;
+  max-width: 900px; /* 稍微收窄全站容器，提升整體精緻度與閱讀舒適度 */
   margin: 0 auto;
   padding: 0 16px;
 }
@@ -82,7 +82,6 @@ a {
   padding: 0 16px;
 }
 
-/* 左側三個斜線選單按鈕 */
 .menu-btn {
   background: none;
   border: none;
@@ -111,7 +110,6 @@ a {
   align-items: center;
 }
 
-/* 深淺色切換按鈕 */
 .theme-toggle-btn {
   background: none;
   border: none;
@@ -123,18 +121,17 @@ a {
   justify-content: center;
 }
 
-/* 分類標籤列 */
 .category-nav {
   display: flex;
   overflow-x: auto;
   white-space: nowrap;
   padding: 8px 16px;
   border-top: 1px solid var(--border-color);
-  scrollbar-width: none; /* Firefox 隱藏滾動條 */
+  scrollbar-width: none;
 }
 
 .category-nav::-webkit-scrollbar {
-  display: none; /* Chrome/Safari 隱藏滾動條 */
+  display: none;
 }
 
 .category-tab {
@@ -157,13 +154,13 @@ a {
    4. 區塊通用樣式 (Section Layout)
    ========================================================================== */
 .section-block {
-  margin: 24px 0;
+  margin: 32px 0;
 }
 
 .section-title {
   font-size: 1.2rem;
   font-weight: 700;
-  margin-bottom: 12px;
+  margin-bottom: 16px;
   display: flex;
   align-items: center;
   border-left: 4px solid var(--accent-color);
@@ -171,13 +168,19 @@ a {
 }
 
 /* ==========================================================================
-   5. 本週焦點新聞 (Featured Hero Section)
+   5. 本週焦點新聞 (Featured Hero Section - 優化寬度與雜誌風排版)
    ========================================================================== */
 .featured-card {
   position: relative;
   border-radius: 12px;
   overflow: hidden;
   background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.featured-card:hover {
   box-shadow: var(--shadow-md);
 }
 
@@ -192,10 +195,15 @@ a {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.featured-card:hover .featured-img-wrapper img {
+  transform: scale(1.02);
 }
 
 .featured-content {
-  padding: 16px;
+  padding: 20px;
 }
 
 .featured-tag {
@@ -204,25 +212,26 @@ a {
   font-weight: 600;
   color: #ffffff;
   background-color: var(--accent-color);
-  padding: 2px 8px;
+  padding: 3px 10px;
   border-radius: 4px;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 }
 
 .featured-title {
-  font-size: 1.25rem;
+  font-size: 1.35rem;
   font-weight: 700;
   line-height: 1.4;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
+  color: var(--text-primary);
 }
 
 .featured-meta {
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   color: var(--text-muted);
 }
 
 /* ==========================================================================
-   6. 文章卡片與清單 (Cards & Lists)
+   文章卡片與清單 (Cards & Lists - 完美整張卡片點擊與防止文字反白)
    ========================================================================== */
 .news-grid {
   display: grid;
@@ -231,17 +240,29 @@ a {
 }
 
 .news-card {
+  position: relative; /* 關鍵：作為絕對定位超連結的基準容器 */
   display: flex;
-  gap: 12px;
+  gap: 14px;
   background-color: var(--bg-card);
-  border-bottom: 1px solid var(--border-color);
-  padding-bottom: 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 12px;
+  box-shadow: var(--shadow-sm);
+  cursor: pointer; /* 讓整張卡片滑鼠移上去時直接變成點擊手勢 */
+  user-select: none; /* 防止使用者點擊或拖曳時誤選反白卡片內的文字 */
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.news-card:hover {
+  border-color: var(--accent-color);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
 }
 
 .news-card-img {
-  width: 100px;
-  height: 75px;
-  border-radius: 8px;
+  width: 110px;
+  height: 80px;
+  border-radius: 6px;
   object-fit: cover;
   background-color: var(--bg-secondary);
   flex-shrink: 0;
@@ -251,30 +272,47 @@ a {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  flex: 1;
 }
 
 .news-card-title {
   font-size: 0.95rem;
   font-weight: 600;
-  line-height: 1.35;
+  line-height: 1.4;
   color: var(--text-primary);
+}
+
+/* 關鍵：利用偽元素將超連結擴展至整張卡片的每一個角落（包含下方小字與空白處） */
+.news-card-title a::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
 }
 
 .news-card-meta {
   font-size: 0.75rem;
   color: var(--text-muted);
+  position: relative;
+  z-index: 2; /* 確保層級正確 */
+  pointer-events: none; /* 讓點擊事件直接穿透至下方的覆蓋超連結 */
 }
 
 /* 公告清單樣式 */
 .announcement-list {
-  background-color: var(--bg-secondary);
-  border-radius: 8px;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
   padding: 8px 16px;
+  box-shadow: var(--shadow-sm);
 }
 
 .announcement-item {
-  padding: 10px 0;
-  border-bottom: 1px dashed var(--border-color);
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border-color);
   display: flex;
   flex-direction: column;
 }
@@ -287,19 +325,21 @@ a {
   font-size: 0.75rem;
   color: var(--accent-color);
   font-weight: 600;
+  margin-bottom: 2px;
 }
 
 .announcement-title {
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   font-weight: 500;
+  color: var(--text-primary);
 }
 
 /* ==========================================================================
    7. 頁尾 (Footer)
    ========================================================================== */
 .site-footer {
-  margin-top: 40px;
-  padding: 24px 16px;
+  margin-top: 60px;
+  padding: 30px 16px;
   background-color: var(--bg-secondary);
   border-top: 1px solid var(--border-color);
   text-align: center;
@@ -316,10 +356,12 @@ a {
   }
 
   .featured-title {
-    font-size: 1.5rem;
+    font-size: 1.6rem;
   }
-}/* ==========================================================================
-   左側抽屜選單 (Side Drawer & Overlay)
+}
+
+/* ==========================================================================
+   9. 左側抽屜選單 (Side Drawer & Overlay)
    ========================================================================== */
 .drawer-overlay {
   position: fixed;
@@ -433,3 +475,40 @@ a {
   color: var(--text-muted);
 }
 
+/* ==========================================================================
+   頂部動態讀取進度條 (Top Loading Bar - 加粗顯眼版)
+   ========================================================================== */
+.top-loading-bar-container {
+  position: absolute;
+  bottom: -3;
+  left: 0;
+  width: 100%;
+  height: 5px; /* 從原本的 3px 調粗至 5px（若想更粗可改 6px） */
+  background-color: transparent;
+  overflow: hidden;
+  z-index: 101;
+}
+
+.top-loading-bar {
+  width: 0%;
+  height: 100%;
+  background-color: var(--accent-color);
+  box-shadow: 0 0 10px var(--accent-color); /* 稍微加大光暈範圍，提升辨識度 */
+  transition: width 0.3s ease, opacity 0.3s ease;
+  opacity: 0;
+}
+
+.top-loading-bar.loading {
+  opacity: 1;
+}
+
+/* 載入時的呼吸光效 */
+@keyframes loading-pulse {
+  0% { opacity: 0.7; }
+  50% { opacity: 1; }
+  100% { opacity: 0.7; }
+}
+
+.top-loading-bar.loading-pulse {
+  animation: loading-pulse 1.2s infinite ease-in-out;
+}

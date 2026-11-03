@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="zh-TW" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>新聞發布後台 - 松山新聞社 SNA</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/article.css">
+  <link rel="stylesheet" href="../css/admin.css">
+</head>
+<body>
+
+  <!-- 頁首容器 -->
+  <header id="site-header-container" class="site-header"></header>
+
+  <main class="container admin-container">
+    <div class="admin-header-box">
+      <h1 class="admin-title">SNA 新聞發布後台</h1>
+      <p class="admin-desc">手動填入文章編號，透過結構化積木排版快速建立報導，資料將自動同步至雲端試算表。</p>
+    </div>
+
+    <form id="article-form">
+      <div class="admin-card">
+        <div class="form-group">
+          <label for="article_id">文章編號 (id)</label>
+          <input type="text" id="article_id" class="form-control" required placeholder="例如：art_2026_01">
+        </div>
+
+        <div class="form-group">
+          <label for="title">文章標題</label>
+          <input type="text" id="title" class="form-control" required placeholder="例如：關於學生會期初大會之決議案">
+        </div>
+
+        <!-- 隱藏的 short_id 欄位 -->
+        <input type="hidden" id="short_id_hidden" value="">
+
+        <div class="form-group">
+          <label for="category">文章分類</label>
+          <select id="category" class="form-control">
+            <option value="自治">自治</option>
+            <option value="學權">學權</option>
+            <option value="校園">校園</option>
+            <option value="其他">其他</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="author">作者 / 編輯組</label>
+          <input type="text" id="author" class="form-control" value="SNA 新聞組">
+        </div>
+
+        <div class="form-group" style="margin-bottom: 0;">
+          <label for="cover_image">封面圖片網址 (URL)</label>
+          <input type="url" id="cover_image" class="form-control" placeholder="https://...">
+        </div>
+      </div>
+
+      <div class="admin-card">
+        <h3 style="margin-bottom: 8px; font-size: 1.2rem; color: var(--text-main);">內文積木排版 (Layout Blocks)</h3>
+        <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px;">依序新增段落、圖片或引言積木來組合文章內文內容。</p>
+        
+        <div id="blocks-container"></div>
+
+        <div style="margin-top: 20px; display: flex; flex-wrap: wrap; gap: 10px;">
+          <button type="button" class="btn btn-secondary" onclick="addBlock('text')">+ 新增文字段落</button>
+          <button type="button" class="btn btn-secondary" onclick="addBlock('image')">+ 新增圖片積木</button>
+          <button type="button" class="btn btn-secondary" onclick="addBlock('quote')">+ 新增引言積木</button>
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-primary submit-btn-override">確認送出並發布文章</button>
+    </form>
+  </main>
+
+  <!-- 自訂置中彈窗容器 -->
+  <div class="modal-overlay" id="custom-modal">
+    <div class="modal-box">
+      <div class="modal-title" id="modal-title">提示訊息</div>
+      <div class="modal-desc" id="modal-desc">內容說明</div>
+      <div class="modal-actions" id="modal-actions"></div>
+    </div>
+  </div>
+
+  <!-- 頁尾容器 -->
+  <footer id="site-footer-container" class="site-footer"></footer>
+
+  <script src="../js/admin.js"></script>
+</body>
+</html>
