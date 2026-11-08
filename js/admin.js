@@ -7,12 +7,20 @@ const GAS_API_URL = "https://script.google.com/macros/s/AKfycbzvdZebFO9zsqGfxw3R
 document.addEventListener("DOMContentLoaded", async () => {
   await loadComponent("site-header-container", "../components/header.html");
   await loadComponent("site-footer-container", "../components/footer.html");
-  
+
   initThemeSwitcher();
   initSideDrawer();
-  
+
   addBlock('text');
   document.getElementById("article-form").addEventListener("submit", handleFormSubmitClick);
+
+  // 加上這段：讓封面圖片輸入框在失去焦點時自動轉換 Google 雲端硬碟連結
+  const coverInput = document.getElementById("cover_image");
+  if (coverInput) {
+    coverInput.addEventListener("blur", function () {
+      this.value = convertGoogleDriveLink(this.value);
+    });
+  }
 });
 
 // 自動調整 textarea 高度的通用函式
@@ -21,7 +29,7 @@ function autoResizeTextarea(textarea) {
   textarea.style.height = (textarea.scrollHeight + 2) + 'px'; // 依據實際內容高度設定
 }
 
-// 動態新增積木
+// 動態新增積木（支援帶入預設內容，並自動加入拖曳排序與拖曳握把）
 function addBlock(type, data = {}) {
   const container = document.getElementById("blocks-container");
   const blockId = 'block_' + Date.now() + Math.random().toString(36).substring(2, 7);
@@ -29,25 +37,29 @@ function addBlock(type, data = {}) {
   div.className = "block-item";
   div.dataset.type = type;
   div.id = blockId;
+  div.draggable = true; // 允許拖曳
 
   let typeName = "文字段落";
   if (type === 'image') typeName = "圖片積木";
   if (type === 'quote') typeName = "引言積木";
 
   let innerHTML = `
-    <div class="block-header">
-      <span>[ ${typeName} ]</span>
+    <div class="block-header" style="display: flex; align-items: center; justify-content: space-between;">
+      <div style="display: flex; align-items: center;">
+        <button type="button" class="block-drag-handle" title="按住拖曳排序">☰</button>
+        <span>[ ${typeName} ]</span>
+      </div>
       <button type="button" class="btn btn-danger" onclick="document.getElementById('${blockId}').remove()">移除</button>
     </div>
   `;
-  
+
   if (type === 'text') {
     innerHTML += `
       <textarea class="form-control auto-resize" rows="2" placeholder="輸入段落內容...">${data.content || ''}</textarea>
     `;
   } else if (type === 'image') {
     innerHTML += `
-      <input type="url" class="form-control img-url" placeholder="圖片網址 URL" value="${data.url || ''}" style="margin-bottom: 10px;">
+      <input type="url" class="form-control img-url" placeholder="圖片網址 URL (支援 Google 雲端硬碟自動轉換)" value="${data.url || ''}" style="margin-bottom: 10px;">
       <input type="text" class="form-control img-caption" placeholder="圖片說明文字 (Caption)" value="${data.caption || ''}">
     `;
   } else if (type === 'quote') {
@@ -60,16 +72,91 @@ function addBlock(type, data = {}) {
   div.innerHTML = innerHTML;
   container.appendChild(div);
 
+  // 綁定拖曳事件 (Drag and Drop)
+  div.addEventListener('dragstart', () => {
+    div.classList.add('dragging');
+  });
+
+  div.addEventListener('dragend', () => {
+    div.classList.remove('dragging');
+  });
+
   // 針對剛建立的 textarea 綁定自動增高事件，並初始化高度
   const textareas = div.querySelectorAll('.auto-resize');
   textareas.forEach(textarea => {
     if (textarea.value) {
-      autoResizeTextarea(textarea); // 如果有預設資料（如修改時），先撐開
+      autoResizeTextarea(textarea);
     }
-    textarea.addEventListener('input', function() {
+    textarea.addEventListener('input', function () {
       autoResizeTextarea(this);
     });
   });
+}
+
+// 支援整個容器內的上下拖曳排序與圖片連結自動轉換監聽
+const container = document.getElementById("blocks-container");
+if (container) {
+  container.addEventListener('dragover', e => {
+    e.preventDefault();
+    const draggingItem = document.querySelector('.dragging');
+    if (!draggingItem) return;
+    const siblings = [...container.querySelectorAll('.block-item:not(.dragging)')];
+
+    const nextSibling = siblings.find(sibling => {
+      const box = sibling.getBoundingClientRect();
+      return e.clientY <= box.top + box.height / 2;
+    });
+
+    if (nextSibling) {
+      container.insertBefore(draggingItem, nextSibling);
+    } else {
+      container.appendChild(draggingItem);
+    }
+  });
+
+  // 讓動態產生的圖片積木網址也能自動轉換 Google 雲端硬碟連結
+  container.addEventListener("blur", function (e) {
+    if (e.target && e.target.classList.contains("img-url")) {
+      e.target.value = convertGoogleDriveLink(e.target.value);
+    }
+  }, true);
+}
+
+// 開啟智慧分段彈窗
+function openSmartSplitModal() {
+  showModal({
+    title: "智慧貼上與分段",
+    desc: `請將記事本中的整篇新聞貼在下方。系統會自動以空白行（段落間隔）為您切開，並自動建立對應的多個文字積木：<br><br>
+      <textarea id="smart-paste-text" class="form-control" rows="8" placeholder="在此貼上整篇新聞內容..." style="resize: vertical;"></textarea>
+    `,
+    showCancel: true,
+    confirmText: "確認自動分段",
+    onConfirm: executeSmartSplit
+  });
+}
+
+// 執行智慧分段邏輯
+function executeSmartSplit() {
+  const rawText = document.getElementById("smart-paste-text").value;
+  if (!rawText.trim()) {
+    alert("請先輸入或貼上文章內容！");
+    return;
+  }
+
+  // 以一個或多個空行（包含空白字元）作為段落切割依據
+  const paragraphs = rawText.split(/\n\s*\n/).map(p => p.trim()).filter(p => p.length > 0);
+
+  if (paragraphs.length === 0) {
+    alert("沒有偵測到有效段落。");
+    return;
+  }
+
+  // 逐一建立文字積木
+  paragraphs.forEach(text => {
+    addBlock('text', { content: text });
+  });
+
+  closeModal();
 }
 
 // 點擊送出時，先跳出確認彈窗
@@ -77,7 +164,7 @@ function handleFormSubmitClick(e) {
   e.preventDefault();
   const title = document.getElementById("title").value;
   const articleId = document.getElementById("article_id").value;
-  
+
   showModal({
     title: "確認發布文章",
     desc: `您即將發布文章：<br><strong>「${title}」</strong><br>(編號: ${articleId})<br><br>確定要寫入至 Google 試算表嗎？`,
@@ -105,7 +192,7 @@ async function executePublish() {
     const now = new Date();
     const yearFull = now.getFullYear();
     const yearShort = String(yearFull).slice(-2);
-    
+
     const currentYearArticles = articles.filter(item => {
       return item.publish_date && item.publish_date.startsWith(String(yearFull));
     });
@@ -181,7 +268,7 @@ function showModal({ title, desc, showCancel, confirmText = "確定", onConfirm 
   const overlay = document.getElementById("custom-modal");
   document.getElementById("modal-title").textContent = title;
   document.getElementById("modal-desc").innerHTML = desc;
-  
+
   const actionsEl = document.getElementById("modal-actions");
   let html = `<button type="button" class="btn btn-primary" id="modal-confirm-btn" style="width: auto !important; padding: 10px 24px !important; color: #fff !important;">${confirmText}</button>`;
   if (showCancel) {
@@ -211,7 +298,7 @@ async function loadComponent(containerId, filePath) {
   try {
     const isGitHubPages = window.location.hostname.includes("github.io");
     const basePath = isGitHubPages ? "/sna/" : "/";
-    
+
     let fullPath = filePath;
     if (!filePath.startsWith("../") && !filePath.startsWith("/")) {
       fullPath = basePath + filePath;
@@ -221,7 +308,7 @@ async function loadComponent(containerId, filePath) {
     if (!response.ok) throw new Error(`無法載入 ${fullPath}`);
     const html = await response.text();
     const container = document.getElementById(containerId);
-    
+
     if (container) {
       container.innerHTML = html;
 
@@ -233,7 +320,7 @@ async function loadComponent(containerId, filePath) {
 
         // 計算回到根目錄的首頁相對路徑（例如在子資料夾就用 '../index.html'，在根目錄就用 'index.html'）
         const relativeHomePath = window.location.pathname.includes("/admin/") || window.location.pathname.includes("/articles/")
-          ? "../index.html" 
+          ? "../index.html"
           : "index.html";
 
         if (logoLink) logoLink.setAttribute("href", relativeHomePath);
@@ -251,7 +338,7 @@ function initThemeSwitcher() {
   const themeToggleBtn = document.getElementById("theme-toggle");
   const savedTheme = localStorage.getItem("theme");
   const systemPrefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-  
+
   if (savedTheme) {
     document.documentElement.setAttribute("data-theme", savedTheme);
   } else if (systemPrefersDark) {
@@ -298,10 +385,10 @@ function initSideDrawer() {
 function startLoadingBar() {
   const bar = document.getElementById("global-loading-bar");
   if (!bar) return;
-  
+
   bar.classList.add("loading", "loading-pulse");
   bar.style.width = "30%";
-  
+
   // 模擬緩慢推進至 85%（給使用者流暢的載入預期）
   setTimeout(() => { if (bar.classList.contains("loading")) bar.style.width = "65%"; }, 400);
   setTimeout(() => { if (bar.classList.contains("loading")) bar.style.width = "85%"; }, 1200);
@@ -310,7 +397,7 @@ function startLoadingBar() {
 function finishLoadingBar() {
   const bar = document.getElementById("global-loading-bar");
   if (!bar) return;
-  
+
   bar.style.width = "100%";
   setTimeout(() => {
     bar.style.opacity = "0";
@@ -326,4 +413,28 @@ function errorLoadingBar() {
   if (!bar) return;
   bar.style.backgroundColor = "#e74c3c";
   finishLoadingBar();
+}
+
+// 自動將 Google 雲端硬碟共用連結轉換為直連圖片格式 (lh3.googleusercontent.com)
+function convertGoogleDriveLink(url) {
+  if (!url) return url;
+
+  let fileId = "";
+
+  // 支援 /file/d/FILE_ID/view 或 ?id=FILE_ID 等常見格式
+  const matchD = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+  const matchIdParam = url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+
+  if (matchD && matchD[1]) {
+    fileId = matchD[1];
+  } else if (matchIdParam && matchIdParam[1]) {
+    fileId = matchIdParam[1];
+  }
+
+  // 如果成功抓到 File ID，就組合成目標格式
+  if (fileId) {
+    return `https://lh3.googleusercontent.com/d/${fileId}`;
+  }
+
+  return url; // 如果不是 Google 雲端連結，就保持原樣
 }

@@ -1,24 +1,18 @@
-// 你的 Google Apps Script Web App 部署完整網址
 const GAS_API_URL = "https://script.google.com/macros/s/AKfycbzvdZebFO9zsqGfxw3ROM36rB5KfOWwuQ7G7AShSh0FpqgsGKpEENwf3-BUw1QmnbQ/exec";
 
 document.addEventListener("DOMContentLoaded", async () => {
   console.log("SNA 網站首頁初始化中...");
 
-  // 1. 優先且獨立載入共用頁首與頁尾
-  await loadComponent("site-header-container", "components/header.html");
-  await loadComponent("site-footer-container", "components/footer.html");
-
-  // 2. 初始化深淺色模式與抽屜選單（確保 Header 載入完成後才綁定 DOM 元素）
+  // 1. 呼叫共用 js/header.js 的渲染與初始化函式
+  renderHeader();
   initThemeSwitcher();
   initSideDrawer();
 
-  // 3. 非同步從 Google 試算表 API 抓取資料並渲染首頁
+  // 2. 非同步從 Google 試算表 API 抓取資料並渲染首頁
   await fetchAndRenderHomeData();
 });
 
-// 核心函式：呼叫 GAS API 並分發資料到首頁各大區段（支援快取與進度條）
 async function fetchAndRenderHomeData() {
-  // 1. 快取優先機制：若本地有上次備份的資料，立刻 0 秒秒開渲染
   const cachedData = localStorage.getItem("sna_articles_cache");
   if (cachedData) {
     try {
@@ -28,11 +22,10 @@ async function fetchAndRenderHomeData() {
       renderRightsArticles(parsed.articles || []);
       renderAnnouncements(parsed.announcements || []);
     } catch (e) {
-      console.warn("讀取快取資料失敗，將重新向伺服器請求", e);
+      console.warn("讀取快取資料失敗", e);
     }
   }
 
-  // 2. 啟動頂部動態進度條，向 GAS 發送非同步請求同步最新資料
   startLoadingBar();
 
   try {
@@ -43,33 +36,37 @@ async function fetchAndRenderHomeData() {
       const articles = result.articles || [];
       const announcements = result.announcements || [];
 
-      // 將最新的資料寫入快取，供下次瞬間載入使用
       localStorage.setItem("sna_articles_cache", JSON.stringify(result));
 
-      // 重新渲染最新的畫面
       renderFeaturedArticle(articles);
       renderRecommendedArticles(articles);
       renderRightsArticles(articles);
       renderAnnouncements(announcements);
 
-      // 進度條流暢滑滿至 100% 並隱藏
       finishLoadingBar();
     } else {
-      console.error("API 回傳狀態異常:", result.message);
+      console.error("API 回傳狀態異常", result.message);
       errorLoadingBar();
     }
   } catch (error) {
-    console.error("無法取得試算表資料:", error);
+    console.error("無法取得試算表資料", error);
     errorLoadingBar();
   }
 }
 
-// A. 本週焦點：自動抓取 publish_date 最新的一篇
+// 標準化日期解析函式（可完美處理帶有 "·" 或多餘空白的日期字串）
+const parseDate = (dateStr) => {
+  if (!dateStr) return 0;
+  const cleanStr = dateStr.replace('·', '').trim();
+  return new Date(cleanStr).getTime() || 0;
+};
+
 function renderFeaturedArticle(articles) {
   const container = document.getElementById("featured-container");
   if (!container || articles.length === 0) return;
 
-  const sorted = [...articles].sort((a, b) => new Date(b.publish_date) - new Date(a.publish_date));
+  // 使用標準化日期進行降序排序，抓取最新的一篇
+  const sorted = [...articles].sort((a, b) => parseDate(b.publish_date) - parseDate(a.publish_date));
   const latest = sorted[0];
 
   container.innerHTML = `
@@ -88,7 +85,6 @@ function renderFeaturedArticle(articles) {
   `;
 }
 
-// B. 推薦內容：自動依 views 點閱率由高到低排序取前 4 篇
 function renderRecommendedArticles(articles) {
   const container = document.getElementById("recommended-container");
   if (!container || articles.length === 0) return;
@@ -107,7 +103,6 @@ function renderRecommendedArticles(articles) {
   `).join('');
 }
 
-// C. 學權內容：自動篩選 category 等於 "學權" 的文章
 function renderRightsArticles(articles) {
   const container = document.getElementById("rights-container");
   if (!container) return;
@@ -130,7 +125,6 @@ function renderRightsArticles(articles) {
   `).join('');
 }
 
-// D. 社內公告：渲染 Announcements 資料
 function renderAnnouncements(announcements) {
   const container = document.getElementById("announcement-container");
   if (!container || announcements.length === 0) return;
@@ -143,104 +137,11 @@ function renderAnnouncements(announcements) {
   `).join('');
 }
 
-// 絕對精準的路徑組件載入函式（支援 GitHub Pages 專案路徑）
-// 升級版：自動修正 Header/Footer 內部相對連結的路徑組件載入函式
-async function loadComponent(containerId, filePath) {
-  try {
-    const isGitHubPages = window.location.hostname.includes("github.io");
-    const basePath = isGitHubPages ? "/sna/" : "/";
-    
-    let fullPath = filePath;
-    if (!filePath.startsWith("../") && !filePath.startsWith("/")) {
-      fullPath = basePath + filePath;
-    }
-
-    const response = await fetch(fullPath);
-    if (!response.ok) throw new Error(`無法載入 ${fullPath}`);
-    const html = await response.text();
-    const container = document.getElementById(containerId);
-    
-    if (container) {
-      container.innerHTML = html;
-
-      // 關鍵修復：如果是載入 Header，自動校正所有指向 index.html 的連結
-      if (containerId === "site-header-container") {
-        const logoLink = container.querySelector(".site-logo");
-        const homeTab = container.querySelector(".category-tab[href='index.html']");
-        const drawerHome = container.querySelector(".drawer-link[href='index.html']");
-
-        // 計算回到根目錄的首頁相對路徑（例如在子資料夾就用 '../index.html'，在根目錄就用 'index.html'）
-        const relativeHomePath = window.location.pathname.includes("/admin/") || window.location.pathname.includes("/articles/")
-          ? "../index.html" 
-          : "index.html";
-
-        if (logoLink) logoLink.setAttribute("href", relativeHomePath);
-        if (homeTab) homeTab.setAttribute("href", relativeHomePath);
-        if (drawerHome) drawerHome.setAttribute("href", relativeHomePath);
-      }
-    }
-  } catch (error) {
-    console.error("載入組件失敗:", error);
-  }
-}
-
-// 深淺色模式切換
-function initThemeSwitcher() {
-  const themeToggleBtn = document.getElementById("theme-toggle");
-  const savedTheme = localStorage.getItem("theme");
-  const systemPrefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-  
-  if (savedTheme) {
-    document.documentElement.setAttribute("data-theme", savedTheme);
-  } else if (systemPrefersDark) {
-    document.documentElement.setAttribute("data-theme", "dark");
-  } else {
-    document.documentElement.setAttribute("data-theme", "light");
-  }
-
-  if (themeToggleBtn) {
-    themeToggleBtn.addEventListener("click", () => {
-      const currentTheme = document.documentElement.getAttribute("data-theme");
-      const newTheme = currentTheme === "dark" ? "light" : "dark";
-      document.documentElement.setAttribute("data-theme", newTheme);
-      localStorage.setItem("theme", newTheme);
-    });
-  }
-}
-
-// 側邊抽屜選單互動控制
-function initSideDrawer() {
-  const menuBtn = document.getElementById("menu-btn");
-  const closeBtn = document.getElementById("drawer-close-btn");
-  const overlay = document.getElementById("drawer-overlay");
-  const drawer = document.getElementById("side-drawer");
-
-  function openDrawer() {
-    if (drawer) drawer.classList.add("active");
-    if (overlay) overlay.classList.add("active");
-    document.body.style.overflow = "hidden";
-  }
-
-  function closeDrawer() {
-    if (drawer) drawer.classList.remove("active");
-    if (overlay) overlay.classList.remove("active");
-    document.body.style.overflow = "";
-  }
-
-  if (menuBtn) menuBtn.addEventListener("click", openDrawer);
-  if (closeBtn) closeBtn.addEventListener("click", closeDrawer);
-  if (overlay) overlay.addEventListener("click", closeDrawer);
-}
-
-// 控制頂部進度條控制函式
 function startLoadingBar() {
   const bar = document.getElementById("global-loading-bar");
   if (!bar) return;
-  
   bar.classList.add("loading", "loading-pulse");
   bar.style.width = "30%";
-  
-  // 模擬緩慢推進至 85%（給使用者流暢的載入預期）
   setTimeout(() => { if (bar.classList.contains("loading")) bar.style.width = "65%"; }, 400);
   setTimeout(() => { if (bar.classList.contains("loading")) bar.style.width = "85%"; }, 1200);
 }
@@ -248,7 +149,6 @@ function startLoadingBar() {
 function finishLoadingBar() {
   const bar = document.getElementById("global-loading-bar");
   if (!bar) return;
-  
   bar.style.width = "100%";
   setTimeout(() => {
     bar.style.opacity = "0";

@@ -193,3 +193,168 @@ select.form-control option {
   border: none !important;
   box-shadow: 0 2px 8px rgba(27, 94, 32, 0.25) !important;
 }
+
+/* ==========================================
+   積木拖曳與智慧分段專屬樣式
+   ========================================== */
+.block-item {
+  cursor: default;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.block-item.dragging {
+  opacity: 0.4;
+  border: 2px dashed var(--accent-color);
+}
+
+/* 拖曳握把按鈕樣式 */
+.block-drag-handle {
+  cursor: grab;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-weight: bold;
+  font-size: 1.1rem;
+  padding: 0 6px;
+  margin-right: 4px;
+}
+
+.block-drag-handle:active {
+  cursor: grabbing;
+}
+
+/* 讓「智慧貼上與分段」按鈕改為高質感的深綠色 */
+button[onclick="openSmartSplitModal()"] {
+  background-color: #1b5e20 !important;
+  color: #ffffff !important;
+  border: none !important;
+  box-shadow: 0 2px 8px rgba(27, 94, 32, 0.25) !important;
+  transition: background-color 0.2s ease, transform 0.1s ease !important;
+}
+
+button[onclick="openSmartSplitModal()"]:hover {
+  background-color: #144e19 !important;
+}
+
+/* ==========================================
+   智慧分段彈窗細節優化
+   ========================================== */
+
+/* 1. 修正彈窗說明文字改為左對齊，並確保行高舒適 */
+.modal-box .modal-desc {
+  text-align: left !important;
+  line-height: 1.6 !important;
+}
+
+/* 2. 智慧分段的文字輸入框：亮灰色/白色文字、深色背景、防止背景滾輪穿透 */
+#smart-paste-text {
+  color: var(--text-primary, #f0f0f0) !important;
+  background-color: var(--bg-main, #1e1e1e) !important;
+  border: 1px solid var(--border-color, #333333) !important;
+  font-size: 0.95rem !important;
+  padding: 12px !important;
+  border-radius: 8px !important;
+  margin-top: 12px !important;
+}
+
+#smart-paste-text::placeholder {
+  color: var(--text-muted, #8e8e93) !important;
+  opacity: 0.7;
+}
+
+/* 3. 防止彈窗開啟時滑鼠滾輪穿透到底層頁面 */
+.modal-overlay.active {
+  overscroll-behavior: contain;
+}
+
+.modal-box {
+  max-height: 85vh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+/* 讓智慧分段的文字輸入框可以自由流暢地滾動，且不影響背景 */
+#smart-paste-text {
+  color: var(--text-primary, #f0f0f0) !important;
+  background-color: var(--bg-main, #1e1e1e) !important;
+  border: 1px solid var(--border-color, #333333) !important;
+  font-size: 0.95rem !important;
+  padding: 12px !important;
+  border-radius: 8px !important;
+  margin-top: 12px !important;
+  max-height: 250px !important; /* 限制最大高度，超過即可滾動 */
+  overflow-y: auto !important;
+  overscroll-behavior: contain !important; /* 關鍵：防止滾動事件穿透到背景 */
+}
+
+#smart-paste-text::placeholder {
+  color: var(--text-muted, #8e8e93) !important;
+  opacity: 0.7;
+}
+
+/* ==========================================
+   自訂精美現代捲軸樣式 (適用智慧分段輸入框)
+   ========================================== */
+#smart-paste-text::-webkit-scrollbar {
+  width: 8px;
+}
+
+#smart-paste-text::-webkit-scrollbar-track {
+  background: var(--bg-card, #252525);
+  border-radius: 4px;
+}
+
+#smart-paste-text::-webkit-scrollbar-thumb {
+  background: var(--border-color, #444444);
+  border-radius: 4px;
+}
+
+#smart-paste-text::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted, #777777);
+}
+
+/* 隱藏或美化智慧分段輸入框右下角的調整大小控制點 */
+#smart-paste-text::-webkit-resizer {
+  background-color: transparent;
+}
+
+/* ==========================================
+   智慧分段輸入框（完美支援深淺色模式自動適應）
+   ========================================== */
+#smart-paste-text {
+  color: var(--text-main) !important;
+  background-color: var(--bg-main) !important;
+  border: 1px solid var(--border-color) !important;
+  font-size: 0.95rem !important;
+  padding: 12px !important;
+  border-radius: 8px !important;
+  margin-top: 12px !important;
+  max-height: 250px !important;
+  overflow-y: auto !important;
+  overscroll-behavior: contain !important;
+  resize: none !important;
+}
+
+#smart-paste-text::placeholder {
+  color: var(--text-muted) !important;
+  opacity: 0.7;
+}
+
+/* 捲軸樣式同步支援 CSS 變數 */
+#smart-paste-text::-webkit-scrollbar {
+  width: 8px;
+}
+
+#smart-paste-text::-webkit-scrollbar-track {
+  background: var(--bg-card);
+  border-radius: 4px;
+}
+
+#smart-paste-text::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 4px;
+}
+
+#smart-paste-text::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}

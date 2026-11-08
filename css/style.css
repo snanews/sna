@@ -2,7 +2,6 @@
    1. 深淺色模式變數 (Theme Variables)
    ========================================================================== */
 :root {
-  /* 預設淺色模式 (Light Mode) */
   --bg-primary: #ffffff;
   --bg-secondary: #f4f6f8;
   --bg-card: #ffffff;
@@ -10,7 +9,6 @@
   --text-secondary: #666666;
   --text-muted: #8e8e93;
   --border-color: #e5e5ea;
-  /* 主視覺色彩調整為 #075c40 */
   --accent-color: #075c40;
   --accent-hover: #054530;
   --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.05);
@@ -18,7 +16,6 @@
 }
 
 [data-theme="dark"] {
-  /* 深色模式 (Dark Mode) */
   --bg-primary: #121212;
   --bg-secondary: #1e1e1e;
   --bg-card: #252525;
@@ -26,16 +23,12 @@
   --text-secondary: #b0b0b0;
   --text-muted: #777777;
   --border-color: #333333;
-  /* 深色模式下提升主視覺對比度 */
   --accent-color: #128a62;
   --accent-hover: #1ab07d;
   --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.5);
 }
 
-/* ==========================================================================
-   2. 全域基礎樣式
-   ========================================================================== */
 * {
   box-sizing: border-box;
   margin: 0;
@@ -57,7 +50,7 @@ a {
 
 .container {
   width: 100%;
-  max-width: 900px; /* 稍微收窄全站容器，提升整體精緻度與閱讀舒適度 */
+  max-width: 900px;
   margin: 0 auto;
   padding: 0 16px;
 }
@@ -168,7 +161,7 @@ a {
 }
 
 /* ==========================================================================
-   5. 本週焦點新聞 (Featured Hero Section - 優化寬度與雜誌風排版)
+   5. 本週焦點新聞 (Featured Hero Section)
    ========================================================================== */
 .featured-card {
   position: relative;
@@ -231,25 +224,25 @@ a {
 }
 
 /* ==========================================================================
-   文章卡片與清單 (Cards & Lists - 完美整張卡片點擊與防止文字反白)
+   6. 文章卡片與清單 (所有報導頁面專用 - 單列大卡片版型)
    ========================================================================== */
 .news-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 16px;
+  gap: 20px;
 }
 
 .news-card {
-  position: relative; /* 關鍵：作為絕對定位超連結的基準容器 */
+  position: relative;
   display: flex;
-  gap: 14px;
+  gap: 18px;
   background-color: var(--bg-card);
   border: 1px solid var(--border-color);
-  border-radius: 10px;
-  padding: 12px;
+  border-radius: 12px;
+  padding: 16px;
   box-shadow: var(--shadow-sm);
-  cursor: pointer; /* 讓整張卡片滑鼠移上去時直接變成點擊手勢 */
-  user-select: none; /* 防止使用者點擊或拖曳時誤選反白卡片內的文字 */
+  cursor: pointer;
+  user-select: none;
   transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
 }
 
@@ -260,9 +253,9 @@ a {
 }
 
 .news-card-img {
-  width: 110px;
-  height: 80px;
-  border-radius: 6px;
+  width: 160px;
+  height: 115px;
+  border-radius: 8px;
   object-fit: cover;
   background-color: var(--bg-secondary);
   flex-shrink: 0;
@@ -276,13 +269,12 @@ a {
 }
 
 .news-card-title {
-  font-size: 0.95rem;
+  font-size: 1.05rem;
   font-weight: 600;
-  line-height: 1.4;
+  line-height: 1.45;
   color: var(--text-primary);
 }
 
-/* 關鍵：利用偽元素將超連結擴展至整張卡片的每一個角落（包含下方小字與空白處） */
 .news-card-title a::after {
   content: "";
   position: absolute;
@@ -294,14 +286,89 @@ a {
 }
 
 .news-card-meta {
-  font-size: 0.75rem;
+  font-size: 0.8rem;
   color: var(--text-muted);
   position: relative;
-  z-index: 2; /* 確保層級正確 */
-  pointer-events: none; /* 讓點擊事件直接穿透至下方的覆蓋超連結 */
+  z-index: 2;
+  pointer-events: none;
 }
 
-/* 公告清單樣式 */
+/* 讓「所有新聞報導」頁面中的卡片上下保持完美的空隙 */
+.single-news-list .news-card {
+  margin-bottom: 16px; /* 這裡可以自由調整間距大小，例如 16px 或 20px */
+}
+
+/* 確保最後一張卡片下方不需要多餘的外距 */
+.single-news-list .news-card:last-child {
+  margin-bottom: 0;
+}
+
+/* 讓首頁維持雙欄網格 */
+.home-news-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+@media (min-width: 768px) {
+  .home-news-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* 讓首頁橫向卡片的右側文字區塊能夠上下撐開，讓標題在上方、資訊在最下方 */
+.home-news-grid .news-card-body {
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: space-between !important;
+  height: 100% !important;
+}
+
+/* 確保標題與下方資訊之間有漂亮的分配 */
+.home-news-grid .news-card-title {
+  font-size: 0.95rem !important;
+  font-weight: 600 !important;
+  line-height: 1.4 !important;
+  margin-bottom: 4px !important;
+}
+
+.home-news-grid .news-card-meta {
+  font-size: 0.75rem !important;
+  color: var(--text-muted) !important;
+  margin-top: auto !important;
+}
+
+/* 將首頁卡片的圖片尺寸縮小，讓卡片更緊湊、不空曠 */
+.home-news-grid .news-card-img {
+  width: 100px !important;
+  height: 75px !important;
+  border-radius: 6px !important;
+  object-fit: cover !important;
+  flex-shrink: 0 !important;
+}
+
+/* 確保卡片整體的內距與高度也跟著精簡 */
+.home-news-grid .news-card {
+  padding: 10px 12px !important;
+  gap: 12px !important;
+  align-items: center !important;
+}
+
+/* ==========================================================================
+   6-1. 首頁專用網格 (雙列排版)
+   ========================================================================== */
+.home-news-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+@media (min-width: 768px) {
+  .home-news-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 .announcement-list {
   background-color: var(--bg-card);
   border: 1px solid var(--border-color);
@@ -348,19 +415,6 @@ a {
 }
 
 /* ==========================================================================
-   8. 電腦版響應式適配 (Desktop RWD)
-   ========================================================================== */
-@media (min-width: 768px) {
-  .news-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .featured-title {
-    font-size: 1.6rem;
-  }
-}
-
-/* ==========================================================================
    9. 左側抽屜選單 (Side Drawer & Overlay)
    ========================================================================== */
 .drawer-overlay {
@@ -395,6 +449,7 @@ a {
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   flex-direction: column;
+  overflow-y: auto;
 }
 
 .side-drawer.active {
@@ -407,6 +462,8 @@ a {
   justify-content: space-between;
   padding: 16px;
   border-bottom: 1px solid var(--border-color);
+  background-color: var(--bg-card);
+  flex-shrink: 0;
 }
 
 .drawer-title {
@@ -431,6 +488,8 @@ a {
 
 .drawer-menu {
   list-style: none;
+  margin: 0;
+  padding: 0;
 }
 
 .drawer-item {
@@ -473,17 +532,18 @@ a {
   border-top: 1px solid var(--border-color);
   font-size: 0.8rem;
   color: var(--text-muted);
+  flex-shrink: 0;
 }
 
 /* ==========================================================================
-   頂部動態讀取進度條 (Top Loading Bar - 加粗顯眼版)
+   頂部動態讀取進度條（已依要求向下位移 3px）
    ========================================================================== */
 .top-loading-bar-container {
   position: absolute;
-  bottom: -3;
+  bottom: -3px;
   left: 0;
   width: 100%;
-  height: 5px; /* 從原本的 3px 調粗至 5px（若想更粗可改 6px） */
+  height: 5px;
   background-color: transparent;
   overflow: hidden;
   z-index: 101;
@@ -493,7 +553,7 @@ a {
   width: 0%;
   height: 100%;
   background-color: var(--accent-color);
-  box-shadow: 0 0 10px var(--accent-color); /* 稍微加大光暈範圍，提升辨識度 */
+  box-shadow: 0 0 10px var(--accent-color);
   transition: width 0.3s ease, opacity 0.3s ease;
   opacity: 0;
 }
@@ -502,7 +562,6 @@ a {
   opacity: 1;
 }
 
-/* 載入時的呼吸光效 */
 @keyframes loading-pulse {
   0% { opacity: 0.7; }
   50% { opacity: 1; }

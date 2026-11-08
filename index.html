@@ -2,6 +2,17 @@
 <html lang="zh-TW" data-theme="light">
 <head>
   <meta charset="UTF-8">
+
+  <!-- 搶先在畫面渲染前讀取 localStorage 並套用主題，徹底消除白光閃爍 -->
+  <script>
+    (function() {
+      const savedTheme = localStorage.getItem("theme");
+      const systemDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      const theme = savedTheme || (systemDark ? "dark" : "light");
+      document.documentElement.setAttribute("data-theme", theme);
+    })();
+  </script>
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>松山新聞社 SNA</title>
   <!-- 引入全站共用樣式表 -->
@@ -9,7 +20,7 @@
 </head>
 <body>
 
-  <!-- 頁首容器：由 js/index.js 動態載入 components/header.html -->
+  <!-- 頁首容器：由 js/index.js 動態渲染 -->
   <header id="site-header-container" class="site-header"></header>
 
   <!-- 網站主要內容區塊 -->
@@ -23,7 +34,7 @@
     <!-- 推薦內容區塊 (依點閱率排序) -->
     <section class="section-block">
       <h2 class="section-title">推薦內容</h2>
-      <div class="news-grid" id="recommended-container">
+      <div class="home-news-grid" id="recommended-container">
         <!-- 動態載入熱門文章 -->
       </div>
     </section>
@@ -31,7 +42,7 @@
     <!-- 學權專區區塊 (自動篩選學權分類) -->
     <section class="section-block">
       <h2 class="section-title">學權專區</h2>
-      <div class="news-grid" id="rights-container">
+      <div class="home-news-grid" id="rights-container">
         <!-- 動態載入學權文章 -->
       </div>
     </section>
@@ -46,8 +57,15 @@
 
   </main>
 
-  <!-- 頁尾容器：由 js/index.js 動態載入 components/footer.html -->
-  <footer id="site-footer-container" class="site-footer"></footer>
+  <!-- 頁尾容器 -->
+  <footer id="site-footer-container" class="site-footer">
+    <div class="footer-container">
+      <p>松山新聞社 SNA © 2026</p>
+    </div>
+  </footer>
+
+  <!-- 載入共用導覽列模組 -->
+  <script src="js/header.js"></script>
 
   <!-- 載入首頁專屬控制邏輯 -->
   <script src="js/index.js"></script>

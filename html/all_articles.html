@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="zh-TW" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+
+  <!-- 在畫面渲染前讀取 localStorage 並套用主題，消除白光閃爍 -->
+  <script>
+    (function() {
+      const savedTheme = localStorage.getItem("theme");
+      const systemDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      const theme = savedTheme || (systemDark ? "dark" : "light");
+      document.documentElement.setAttribute("data-theme", theme);
+    })();
+  </script>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>所有新聞報導 - 松山新聞社 SNA</title>
+  <!-- 引入全站共用樣式表 (相對路徑指向上層) -->
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+  <!-- 頁首容器：由 ../js/header.js 動態渲染 -->
+  <header id="site-header-container" class="site-header"></header>
+
+  <!-- 網站主要內容區塊 -->
+  <main class="container">
+    <section class="section-block">
+      <h2 class="section-title">所有新聞報導</h2>
+      
+      <!-- 所有新聞列表渲染區域：使用單列大卡片排版 (.news-grid) -->
+      <div class="single-news-list" id="all-articles-container">
+        <p style="color: var(--text-muted); padding: 20px 0;">新聞載入中...</p>
+      </div>
+    </section>
+  </main>
+
+  <!-- 頁尾容器 -->
+  <footer id="site-footer-container" class="site-footer">
+    <div class="footer-container">
+      <p>松山新聞社 SNA © 2026</p>
+    </div>
+  </footer>
+
+  <!-- 先載入共用導覽列模組，再載入專屬控制邏輯 -->
+  <script src="../js/header.js"></script>
+  <script src="../js/all_articles.js"></script>
+</body>
+</html>

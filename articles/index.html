@@ -2,6 +2,17 @@
 <html lang="zh-TW" data-theme="light">
 <head>
   <meta charset="UTF-8">
+
+  <!-- 搶先在畫面渲染前讀取 localStorage 並套用主題，徹底消除白光閃爍 -->
+  <script>
+    (function() {
+      const savedTheme = localStorage.getItem("theme");
+      const systemDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      const theme = savedTheme || (systemDark ? "dark" : "light");
+      document.documentElement.setAttribute("data-theme", theme);
+    })();
+  </script>
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>文章內頁 - 松山新聞社 SNA</title>
   <!-- 因為位於子目錄，需往上一層載入 CSS -->
@@ -43,6 +54,9 @@
 
   <!-- 頁尾容器：由 js/article.js 動態載入 ../components/footer.html -->
   <footer id="site-footer-container" class="site-footer"></footer>
+
+  <!-- 載入共用導覽列模組 -->
+  <script src="../js/header.js"></script>
 
   <!-- 載入內頁專屬控制邏輯（需往上一層） -->
   <script src="../js/article.js"></script>

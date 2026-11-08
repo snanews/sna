@@ -4,15 +4,12 @@ const GAS_API_URL = "https://script.google.com/macros/s/AKfycbzvdZebFO9zsqGfxw3R
 document.addEventListener("DOMContentLoaded", async () => {
   console.log("SNA 文章內頁初始化中...");
 
-  // 1. 優先且獨立載入共用頁首與頁尾
-  await loadComponent("site-header-container", "../components/header.html");
-  await loadComponent("site-footer-container", "../components/footer.html");
-
-  // 2. 初始化深淺色模式與抽屜選單
+  // 1. 呼叫共用 js/header.js 的渲染與初始化函式
+  renderHeader();
   initThemeSwitcher();
   initSideDrawer();
 
-  // 3. 取得網址列的 id 參數並載入文章內容
+  // 2. 取得網址列的 id 參數並載入文章內容
   const urlParams = new URLSearchParams(window.location.search);
   const articleId = urlParams.get("id");
 
@@ -26,7 +23,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 // 核心函式：向 GAS API 請求資料並找出對應文章進行渲染 (支援快取與進度條)
 async function fetchAndRenderArticle(articleId) {
-  // 1. 快取優先機制：先從首頁備份的快取嘗試尋找文章，0 秒秒開
   const cachedData = localStorage.getItem("sna_articles_cache");
   let foundInCache = false;
 
@@ -46,7 +42,6 @@ async function fetchAndRenderArticle(articleId) {
     }
   }
 
-  // 2. 啟動頂部動態進度條，向伺服器發送請求（同步最新點閱數與內容）
   startLoadingBar();
 
   try {
@@ -60,7 +55,6 @@ async function fetchAndRenderArticle(articleId) {
     }
 
     const articles = result.articles || [];
-    // 寫入快取供全站使用
     localStorage.setItem("sna_articles_cache", JSON.stringify(result));
 
     const article = articles.find(item => String(item.id) === String(articleId));
@@ -71,11 +65,8 @@ async function fetchAndRenderArticle(articleId) {
       return;
     }
 
-    // 渲染最新文章資料
     renderArticleHeader(article);
     renderArticleBlocks(article.layout_json);
-
-    // 完成載入，進度條滑滿
     finishLoadingBar();
 
   } catch (error) {
@@ -152,7 +143,6 @@ function renderArticleBlocks(layoutJsonStr) {
   }
 }
 
-// 呈現錯誤狀態
 function showErrorState(message) {
   const titleEl = document.getElementById("article-title");
   const container = document.getElementById("article-blocks");
@@ -165,7 +155,6 @@ function showErrorState(message) {
   }
 }
 
-// 簡單的 HTML 轉義防護，避免 XSS
 function escapeHtml(str) {
   return String(str)
     .replace(/&/g, "&amp;")
@@ -175,100 +164,11 @@ function escapeHtml(str) {
     .replace(/'/g, "&#039;");
 }
 
-// 升級版：自動修正 Header/Footer 內部相對連結的路徑組件載入函式
-async function loadComponent(containerId, filePath) {
-  try {
-    const isGitHubPages = window.location.hostname.includes("github.io");
-    const basePath = isGitHubPages ? "/sna/" : "/";
-    
-    let fullPath = filePath;
-    if (!filePath.startsWith("../") && !filePath.startsWith("/")) {
-      fullPath = basePath + filePath;
-    }
-
-    const response = await fetch(fullPath);
-    if (!response.ok) throw new Error(`無法載入 ${fullPath}`);
-    const html = await response.text();
-    const container = document.getElementById(containerId);
-    
-    if (container) {
-      container.innerHTML = html;
-
-      if (containerId === "site-header-container") {
-        const logoLink = container.querySelector(".site-logo");
-        const homeTab = container.querySelector(".category-tab[href='index.html']");
-        const drawerHome = container.querySelector(".drawer-link[href='index.html']");
-
-        const relativeHomePath = window.location.pathname.includes("/admin/") || window.location.pathname.includes("/articles/")
-          ? "../index.html" 
-          : "index.html";
-
-        if (logoLink) logoLink.setAttribute("href", relativeHomePath);
-        if (homeTab) homeTab.setAttribute("href", relativeHomePath);
-        if (drawerHome) drawerHome.setAttribute("href", relativeHomePath);
-      }
-    }
-  } catch (error) {
-    console.error("載入組件失敗:", error);
-  }
-}
-
-// 深淺色模式切換
-function initThemeSwitcher() {
-  const themeToggleBtn = document.getElementById("theme-toggle");
-  const savedTheme = localStorage.getItem("theme");
-  const systemPrefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-  
-  if (savedTheme) {
-    document.documentElement.setAttribute("data-theme", savedTheme);
-  } else if (systemPrefersDark) {
-    document.documentElement.setAttribute("data-theme", "dark");
-  } else {
-    document.documentElement.setAttribute("data-theme", "light");
-  }
-
-  if (themeToggleBtn) {
-    themeToggleBtn.addEventListener("click", () => {
-      const currentTheme = document.documentElement.getAttribute("data-theme");
-      const newTheme = currentTheme === "dark" ? "light" : "dark";
-      document.documentElement.setAttribute("data-theme", newTheme);
-      localStorage.setItem("theme", newTheme);
-    });
-  }
-}
-
-// 側邊抽屜選單互動控制
-function initSideDrawer() {
-  const menuBtn = document.getElementById("menu-btn");
-  const closeBtn = document.getElementById("drawer-close-btn");
-  const overlay = document.getElementById("drawer-overlay");
-  const drawer = document.getElementById("side-drawer");
-
-  function openDrawer() {
-    if (drawer) drawer.classList.add("active");
-    if (overlay) overlay.classList.add("active");
-    document.body.style.overflow = "hidden";
-  }
-
-  function closeDrawer() {
-    if (drawer) drawer.classList.remove("active");
-    if (overlay) overlay.classList.remove("active");
-    document.body.style.overflow = "";
-  }
-
-  if (menuBtn) menuBtn.addEventListener("click", openDrawer);
-  if (closeBtn) closeBtn.addEventListener("click", closeDrawer);
-  if (overlay) overlay.addEventListener("click", closeDrawer);
-}
-
-// 控制頂部進度條控制函式
 function startLoadingBar() {
   const bar = document.getElementById("global-loading-bar");
   if (!bar) return;
-  
   bar.classList.add("loading", "loading-pulse");
   bar.style.width = "30%";
-  
   setTimeout(() => { if (bar.classList.contains("loading")) bar.style.width = "65%"; }, 400);
   setTimeout(() => { if (bar.classList.contains("loading")) bar.style.width = "85%"; }, 1200);
 }
@@ -276,7 +176,6 @@ function startLoadingBar() {
 function finishLoadingBar() {
   const bar = document.getElementById("global-loading-bar");
   if (!bar) return;
-  
   bar.style.width = "100%";
   setTimeout(() => {
     bar.style.opacity = "0";
