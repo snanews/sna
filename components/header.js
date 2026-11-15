@@ -13,6 +13,7 @@ function renderHeader() {
   const isHome = currentPath.endsWith("/") || (currentPath.endsWith("index.html") && !currentPath.includes("/html/") && !currentPath.includes("/admin/") && !currentPath.includes("/articles/"));
   const isAllArticles = currentPath.includes("all_articles.html");
   const isAdmin = currentPath.includes("/admin/");
+  const isAutonomy = currentPath.includes("autonomy_articles.html")
 
   const headerContainer = document.getElementById("site-header-container");
   if (!headerContainer) return;
@@ -87,7 +88,7 @@ function renderHeader() {
           <li class="drawer-item"><a href="#" class="drawer-link">常用表件與規章</a></li>
           <li class="drawer-divider"></li>
           <li class="drawer-section-label">新聞分類</li>
-          <li class="drawer-item"><a href="${basePath}html/autonomy_articles.html" class="drawer-link">自治議題</a></li>
+          <li class="drawer-item"><a href="${basePath}html/autonomy_articles.html" class="drawer-link ${isAutonomy ? 'active' : ''}">自治議題</a></li>
           <li class="drawer-item"><a href="#" class="drawer-link">學權權益</a></li>
           <li class="drawer-item"><a href="#" class="drawer-link">校園生活</a></li>
           <li class="drawer-item"><a href="#" class="drawer-link">其他報導</a></li>
