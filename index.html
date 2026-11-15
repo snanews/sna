@@ -1,11 +1,12 @@
 <!DOCTYPE html>
 <html lang="zh-TW" data-theme="light">
+
 <head>
   <meta charset="UTF-8">
 
   <!-- 搶先在畫面渲染前讀取 localStorage 並套用主題，徹底消除白光閃爍 -->
   <script>
-    (function() {
+    (function () {
       const savedTheme = localStorage.getItem("theme");
       const systemDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
       const theme = savedTheme || (systemDark ? "dark" : "light");
@@ -18,6 +19,7 @@
   <!-- 引入全站共用樣式表 -->
   <link rel="stylesheet" href="css/style.css">
 </head>
+
 <body>
 
   <!-- 頁首容器：由 js/index.js 動態渲染 -->
@@ -57,17 +59,14 @@
 
   </main>
 
-  <!-- 頁尾容器 -->
-  <footer id="site-footer-container" class="site-footer">
-    <div class="footer-container">
-      <p>松山新聞社 SNA © 2026</p>
-    </div>
-  </footer>
+  <!-- 頁尾容器：由 JS 動態載入 -->
+  <footer id="site-footer-container" class="site-footer"></footer>
 
   <!-- 載入共用導覽列模組 -->
-  <script src="js/header.js"></script>
+  <script src="components/header.js"></script>
 
   <!-- 載入首頁專屬控制邏輯 -->
   <script src="js/index.js"></script>
 </body>
+
 </html>

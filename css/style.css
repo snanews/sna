@@ -253,7 +253,7 @@ a {
 }
 
 .news-card-img {
-  width: 160px;
+  width: 110px;
   height: 115px;
   border-radius: 8px;
   object-fit: cover;
@@ -570,4 +570,41 @@ a {
 
 .top-loading-bar.loading-pulse {
   animation: loading-pulse 1.2s infinite ease-in-out;
+}
+
+/* ==========================================
+   所有新聞列表頁：手機與電腦版排版適配
+   ========================================== */
+
+/* 1. 手機版預設：隱藏預覽內文，圖片維持輕巧比例 */
+.news-card-desc {
+  display: none; 
+}
+
+.news-card-img {
+  width: 110px;
+  height: 90px;
+  object-fit: cover;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+
+/* 2. 電腦版 (螢幕寬度 768px 以上)：顯示灰色預覽內文、恢復圖片原始較寬比例 */
+@media (min-width: 768px) {
+  .news-card-desc {
+    display: -webkit-box;
+    -webkit-line-clamp: 2; /* 最多顯示 2 行，保持卡片高度一致 */
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 0.85rem;
+    color: var(--text-secondary); /* 確保顏色是灰色而非白色 */
+    line-height: 1.4;
+    margin: 4px 0;
+  }
+
+  .news-card-img {
+    width: 160px; /* 電腦版改回較寬的原始比例 */
+    height: 115px;
+  }
 }

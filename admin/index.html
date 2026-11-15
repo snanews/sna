@@ -1,11 +1,12 @@
 <!DOCTYPE html>
 <html lang="zh-TW" data-theme="light">
+
 <head>
   <meta charset="UTF-8">
 
   <!-- 搶先在畫面渲染前讀取 localStorage 並套用主題，徹底消除白光閃爍 -->
   <script>
-    (function() {
+    (function () {
       const savedTheme = localStorage.getItem("theme");
       const systemDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
       const theme = savedTheme || (systemDark ? "dark" : "light");
@@ -19,9 +20,11 @@
   <link rel="stylesheet" href="../css/article.css">
   <link rel="stylesheet" href="../css/admin.css">
 </head>
+
 <body>
 
   <!-- 頁首容器 -->
+  <!-- 頁首容器：由 ../js/header.js 動態渲染 -->
   <header id="site-header-container" class="site-header"></header>
 
   <main class="container admin-container">
@@ -69,14 +72,15 @@
       <div class="admin-card">
         <h3 style="margin-bottom: 8px; font-size: 1.2rem; color: var(--text-main);">內文積木排版 (Layout Blocks)</h3>
         <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px;">依序新增段落、圖片或引言積木來組合文章內文內容。</p>
-        
+
         <div id="blocks-container"></div>
 
         <div style="margin-top: 20px; display: flex; flex-wrap: wrap; gap: 10px;">
           <button type="button" class="btn btn-secondary" onclick="addBlock('text')">+ 新增文字段落</button>
           <button type="button" class="btn btn-secondary" onclick="addBlock('image')">+ 新增圖片積木</button>
           <button type="button" class="btn btn-secondary" onclick="addBlock('quote')">+ 新增引言積木</button>
-          <button type="button" class="btn btn-primary" style="background-color: #075c40 !important;" onclick="openSmartSplitModal()">智慧貼上與分段</button>
+          <button type="button" class="btn btn-primary" style="background-color: #075c40 !important;"
+            onclick="openSmartSplitModal()">智慧貼上與分段</button>
         </div>
       </div>
 
@@ -93,12 +97,13 @@
     </div>
   </div>
 
+  <!-- 載入共用導覽列模組 -->
+  <script src="../components/header.js"></script>
+
   <!-- 頁尾容器 -->
   <footer id="site-footer-container" class="site-footer"></footer>
 
-  <!-- 載入共用導覽列模組 -->
-  <script src="../js/header.js"></script>
-
   <script src="../js/admin.js"></script>
 </body>
+
 </html>

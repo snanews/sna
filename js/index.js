@@ -3,7 +3,11 @@ const GAS_API_URL = "https://script.google.com/macros/s/AKfycbzvdZebFO9zsqGfxw3R
 document.addEventListener("DOMContentLoaded", async () => {
   console.log("SNA 網站首頁初始化中...");
 
-  // 1. 呼叫共用 js/header.js 的渲染與初始化函式
+  // 動態載入頁首與頁尾組件
+  await loadComponent("site-header-container", "components/header.html");
+  await loadComponent("site-footer-container", "components/footer.html");
+
+  // 1. 初始化共用功能
   renderHeader();
   initThemeSwitcher();
   initSideDrawer();
@@ -11,6 +15,21 @@ document.addEventListener("DOMContentLoaded", async () => {
   // 2. 非同步從 Google 試算表 API 抓取資料並渲染首頁
   await fetchAndRenderHomeData();
 });
+
+// 共用組件載入函式（支援首頁的相對路徑）
+async function loadComponent(containerId, filePath) {
+  try {
+    const response = await fetch(filePath);
+    if (!response.ok) throw new Error(`無法載入 ${filePath}`);
+    const html = await response.text();
+    const container = document.getElementById(containerId);
+    if (container) {
+      container.innerHTML = html;
+    }
+  } catch (error) {
+    console.error("載入組件失敗:", error);
+  }
+}
 
 async function fetchAndRenderHomeData() {
   const cachedData = localStorage.getItem("sna_articles_cache");
@@ -65,20 +84,22 @@ function renderFeaturedArticle(articles) {
   const container = document.getElementById("featured-container");
   if (!container || articles.length === 0) return;
 
-  // 使用標準化日期進行降序排序，抓取最新的一篇
   const sorted = [...articles].sort((a, b) => parseDate(b.publish_date) - parseDate(a.publish_date));
   const latest = sorted[0];
+
+  // 如果沒有 cover_image，就帶入預設的 images/icon.jpg
+  const coverImg = latest.cover_image && latest.cover_image.trim() !== "" ? latest.cover_image : "images/icon.jpg";
 
   container.innerHTML = `
     <div class="featured-card">
       <a href="articles/index.html?id=${latest.id}">
         <div class="featured-img-wrapper">
-          <img src="${latest.cover_image || 'https://via.placeholder.com/800x450'}" alt="${latest.title}">
+          <img src="${coverImg}" alt="${latest.title}">
         </div>
         <div class="featured-content">
           <span class="featured-tag">本週焦點</span>
           <h1 class="featured-title">${latest.title}</h1>
-          <div class="featured-meta">${latest.publish_date} · ${latest.author || 'SNA 新聞組'} (代碼: ${latest.short_code || ''})</div>
+          <div class="featured-meta">${latest.publish_date} · ${latest.author || 'SNA 新聞組'}</div>
         </div>
       </a>
     </div>
@@ -92,15 +113,18 @@ function renderRecommendedArticles(articles) {
   const sorted = [...articles].sort((a, b) => Number(b.views || 0) - Number(a.views || 0));
   const topArticles = sorted.slice(0, 4);
 
-  container.innerHTML = topArticles.map(item => `
-    <article class="news-card">
-      <img src="${item.cover_image || 'https://via.placeholder.com/100x75'}" alt="縮圖" class="news-card-img">
-      <div class="news-card-body">
-        <h3 class="news-card-title"><a href="articles/index.html?id=${item.id}">${item.title}</a></h3>
-        <span class="news-card-meta">${item.publish_date} · 點閱 ${item.views || 0} 次</span>
-      </div>
-    </article>
-  `).join('');
+  container.innerHTML = topArticles.map(item => {
+    const coverImg = item.cover_image && item.cover_image.trim() !== "" ? item.cover_image : "images/icon.jpg";
+    return `
+      <article class="news-card">
+        <img src="${coverImg}" alt="縮圖" class="news-card-img">
+        <div class="news-card-body">
+          <h3 class="news-card-title"><a href="articles/index.html?id=${item.id}">${item.title}</a></h3>
+          <span class="news-card-meta">${item.publish_date} · 點閱 ${item.views || 0} 次</span>
+        </div>
+      </article>
+    `;
+  }).join('');
 }
 
 function renderRightsArticles(articles) {
@@ -114,15 +138,18 @@ function renderRightsArticles(articles) {
     return;
   }
 
-  container.innerHTML = rightsList.map(item => `
-    <article class="news-card">
-      <img src="${item.cover_image || 'https://via.placeholder.com/100x75'}" alt="縮圖" class="news-card-img">
-      <div class="news-card-body">
-        <h3 class="news-card-title"><a href="articles/index.html?id=${item.id}">${item.title}</a></h3>
-        <span class="news-card-meta">${item.publish_date} · ${item.author || 'SNA 學權組'}</span>
-      </div>
-    </article>
-  `).join('');
+  container.innerHTML = rightsList.map(item => {
+    const coverImg = item.cover_image && item.cover_image.trim() !== "" ? item.cover_image : "images/icon.jpg";
+    return `
+      <article class="news-card">
+        <img src="${coverImg}" alt="縮圖" class="news-card-img">
+        <div class="news-card-body">
+          <h3 class="news-card-title"><a href="articles/index.html?id=${item.id}">${item.title}</a></h3>
+          <span class="news-card-meta">${item.publish_date} · ${item.author || 'SNA 學權組'}</span>
+        </div>
+      </article>
+    `;
+  }).join('');
 }
 
 function renderAnnouncements(announcements) {

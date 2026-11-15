@@ -63,13 +63,12 @@
 }
 
 .article-figure img {
-  width: 100%;
-  max-height: 500px;
-  border-radius: 12px;
-  object-fit: cover;
-  background-color: var(--bg-card);
-  border: 1px solid var(--border-color);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+  width: 100%;                                         /* 寬度強制填滿容器 */
+  height: auto;                                        /* 高度依原始比例自動長高，絕不裁切、不設限高 */
+  border-radius: 12px;                                 /* 保留：精緻圓角 */
+  background-color: var(--bg-card);                    /* 保留：底色 */
+  border: 1px solid var(--border-color);               /* 保留：邊框 */
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);        /* 保留：柔和陰影 */
 }
 
 .article-figure figcaption {

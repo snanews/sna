@@ -9,9 +9,41 @@ document.addEventListener("DOMContentLoaded", async () => {
     initThemeSwitcher();
     initSideDrawer();
 
+    // 2. 非同步載入共用頁尾（footer.html）
+    await loadComponent("site-footer-container", "../components/footer.html");
+
     // 2. 抓取所有新聞並由舊到新渲染
     await fetchAndRenderAllArticles();
+
+
 });
+
+
+// 共用組件載入函式（專門用來載入頁尾）
+async function loadComponent(containerId, filePath) {
+    try {
+        const response = await fetch(filePath);
+        if (!response.ok) throw new Error(`無法載入 ${filePath}`);
+        const html = await response.text();
+        const container = document.getElementById(containerId);
+        if (container) {
+            container.innerHTML = html;
+
+            // 如果是載入 Footer，自動校正內部指向首頁的連結（因為身處 /html/ 資料夾內）
+            if (containerId === "site-footer-container") {
+                const footerLinks = container.querySelectorAll("a");
+                footerLinks.forEach(link => {
+                    const href = link.getAttribute("href");
+                    if (href && href === "index.html") {
+                        link.setAttribute("href", "../index.html");
+                    }
+                });
+            }
+        }
+    } catch (error) {
+        console.error("載入組件失敗:", error);
+    }
+}
 
 async function fetchAndRenderAllArticles() {
     const container = document.getElementById("all-articles-container");
@@ -73,6 +105,9 @@ function getArticleExcerpt(layoutJsonStr) {
 }
 
 // 核心函式：將新聞按 publish_date 「由舊到新」排序並渲染
+// 核心函式：將新聞按 publish_date 排序並渲染
+// 核心函式：將新聞按 publish_date 排序並渲染
+// 核心函式：將新聞按 publish_date 排序並渲染
 function renderSortedArticles(articles) {
     const container = document.getElementById("all-articles-container");
     if (!container) return;
@@ -83,31 +118,32 @@ function renderSortedArticles(articles) {
     }
 
     const sortedArticles = [...articles].sort((a, b) => {
-        // 將日期字串標準化：把 "2026/11/03 · 21:24:03" 轉成 "2026/11/03 21:24:03"
         const parseDate = (dateStr) => {
             if (!dateStr) return 0;
             const cleanStr = dateStr.replace('·', '').trim();
             return new Date(cleanStr).getTime() || 0;
         };
-
-        // 降序排序：b - a (由新到舊)
         return parseDate(b.publish_date) - parseDate(a.publish_date);
     });
+    
     const articleLinkPath = "../articles/index.html";
 
     container.innerHTML = sortedArticles.map(item => {
         const excerpt = getArticleExcerpt(item.layout_json);
+        // 檢查是否有獨立縮圖，若無則使用預設社徽圖片
+        const coverImg = item.cover_image && item.cover_image.trim() !== "" ? item.cover_image : "../images/icon.jpg";
+
         return `
-      <article class="news-card" style="margin-bottom: 24px !important; display: flex !important; gap: 18px !important; padding: 16px !important;">
-        <img src="${item.cover_image || 'https://via.placeholder.com/100x75'}" alt="縮圖" class="news-card-img" style="width: 160px !important; height: 115px !important; object-fit: cover !important;">
-        <div class="news-card-body" style="display: flex !important; flex-direction: column !important; justify-content: space-between !important; flex: 1 !important;">
+      <article class="news-card">
+        <img src="${coverImg}" alt="縮圖" class="news-card-img">
+        <div class="news-card-body">
           <div>
-            <h3 class="news-card-title" style="font-size: 1.05rem !important; font-weight: 600 !important; line-height: 1.45 !important; margin-bottom: 6px !important;">
+            <h3 class="news-card-title">
               <a href="${articleLinkPath}?id=${item.id}">${item.title}</a>
             </h3>
-            <p style="font-size: 0.9rem !important; color: var(--text-secondary, #666) !important; line-height: 1.5 !important;">${excerpt}</p>
+            <p class="news-card-desc">${excerpt}</p>
           </div>
-          <span class="news-card-meta" style="font-size: 0.8rem !important; color: var(--text-muted) !important; margin-top: 8px !important;">${item.publish_date} · ${item.author || 'SNA 編輯組'} · 點閱 ${item.views || 0} 次</span>
+          <span class="news-card-meta">${item.publish_date} · ${item.author || 'SNA 編輯組'} · 點閱 ${item.views || 0} 次</span>
         </div>
       </article>
     `;

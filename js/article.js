@@ -4,6 +4,9 @@ const GAS_API_URL = "https://script.google.com/macros/s/AKfycbzvdZebFO9zsqGfxw3R
 document.addEventListener("DOMContentLoaded", async () => {
   console.log("SNA 文章內頁初始化中...");
 
+  await loadComponent("site-header-container", "../components/header.html");
+  await loadComponent("site-footer-container", "../components/footer.html");
+
   // 1. 呼叫共用 js/header.js 的渲染與初始化函式
   renderHeader();
   initThemeSwitcher();
@@ -20,6 +23,21 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   await fetchAndRenderArticle(articleId);
 });
+
+// 共用組件載入函式（支援首頁的相對路徑）
+async function loadComponent(containerId, filePath) {
+  try {
+    const response = await fetch(filePath);
+    if (!response.ok) throw new Error(`無法載入 ${filePath}`);
+    const html = await response.text();
+    const container = document.getElementById(containerId);
+    if (container) {
+      container.innerHTML = html;
+    }
+  } catch (error) {
+    console.error("載入組件失敗:", error);
+  }
+}
 
 // 核心函式：向 GAS API 請求資料並找出對應文章進行渲染 (支援快取與進度條)
 async function fetchAndRenderArticle(articleId) {
@@ -89,7 +107,7 @@ function renderArticleHeader(article) {
   if (categoryEl) categoryEl.textContent = article.category || "未分類";
   if (titleEl) titleEl.textContent = article.title || "無標題";
   if (metaEl) {
-    metaEl.innerHTML = `<span>${article.publish_date || ''} · ${article.author || 'SNA 編輯組'}</span>${article.views ? `<span> · 點閱 ${article.views} 次</span>` : ''}`;
+    metaEl.textContent = `${article.publish_date || ''} · ${article.author || 'SNA 編輯組'}${article.views ? ` · 點閱 ${article.views} 次` : ''}`;
   }
 }
 
@@ -115,7 +133,7 @@ function renderArticleBlocks(layoutJsonStr) {
       switch (block.type) {
         case "text":
           return `<p class="article-paragraph">${escapeHtml(block.content || '')}</p>`;
-        
+
         case "image":
           return `
             <figure class="article-figure">
@@ -123,7 +141,7 @@ function renderArticleBlocks(layoutJsonStr) {
               ${block.caption ? `<figcaption>${escapeHtml(block.caption)}</figcaption>` : ''}
             </figure>
           `;
-        
+
         case "quote":
           return `
             <blockquote class="article-quote">
@@ -131,7 +149,7 @@ function renderArticleBlocks(layoutJsonStr) {
               ${block.author ? `<cite>— ${escapeHtml(block.author)}</cite>` : ''}
             </blockquote>
           `;
-        
+
         default:
           return `<div class="article-unknown-block">${escapeHtml(block.content || '')}</div>`;
       }
