@@ -105,9 +105,6 @@ function getArticleExcerpt(layoutJsonStr) {
 }
 
 // 核心函式：將新聞按 publish_date 「由舊到新」排序並渲染
-// 核心函式：將新聞按 publish_date 排序並渲染
-// 核心函式：將新聞按 publish_date 排序並渲染
-// 核心函式：將新聞按 publish_date 排序並渲染
 function renderSortedArticles(articles) {
     const container = document.getElementById("all-articles-container");
     if (!container) return;

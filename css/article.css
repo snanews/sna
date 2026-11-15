@@ -1,0 +1,138 @@
+/* ==========================================================================
+   文章內頁排版與積木樣式 (對齊 js/article.js 專屬版)
+   ========================================================================== */
+.article-container {
+  max-width: 760px; /* 舒適的閱讀寬度 */
+  margin: 48px auto 80px auto;
+  padding: 0 20px;
+}
+
+.article-header {
+  margin-bottom: 36px;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 24px;
+}
+
+.article-category-tag {
+  display: inline-block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #ffffff;
+  background-color: var(--primary-color, #107c41);
+  padding: 4px 12px;
+  border-radius: 6px;
+  margin-bottom: 14px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.article-title {
+  font-size: 2.2rem;
+  font-weight: 700;
+  line-height: 1.35;
+  color: var(--text-main);
+  margin-bottom: 14px;
+}
+
+.article-meta {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+/* 核心積木渲染區塊容器 */
+.article-content-blocks {
+  display: flex;
+  flex-direction: column;
+  gap: 28px; /* 增加區塊間距，提升閱讀呼吸感 */
+}
+
+/* 1. 文字積木 (.article-paragraph) */
+.article-paragraph {
+  font-size: 1.05rem;
+  line-height: 1.9;
+  color: var(--text-main);
+  white-space: pre-wrap;
+}
+
+/* 2. 圖片積木 (.article-figure) */
+.article-figure {
+  margin: 20px 0;
+  text-align: center;
+}
+
+.article-figure img {
+  width: 100%;                                         /* 寬度強制填滿容器 */
+  height: auto;                                        /* 高度依原始比例自動長高，絕不裁切、不設限高 */
+  border-radius: 12px;                                 /* 保留：精緻圓角 */
+  background-color: var(--bg-card);                    /* 保留：底色 */
+  border: 1px solid var(--border-color);               /* 保留：邊框 */
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);        /* 保留：柔和陰影 */
+}
+
+.article-figure figcaption {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin-top: 10px;
+  text-align: center;
+}
+
+/* 3. 引言積木 (.article-quote) */
+.article-quote {
+  border-left: 5px solid var(--primary-color, #107c41);
+  background-color: var(--bg-card);
+  padding: 22px 26px;
+  margin: 20px 0;
+  font-size: 1.05rem;
+  font-style: italic;
+  color: var(--text-main);
+  border-radius: 0 12px 12px 0;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.03);
+  border-top: 1px solid var(--border-color);
+  border-right: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.article-quote p {
+  margin-bottom: 8px;
+  line-height: 1.6;
+}
+
+.article-quote cite {
+  display: block;
+  font-size: 0.9rem;
+  font-style: normal;
+  color: var(--text-muted);
+  text-align: right;
+  font-weight: 500;
+}
+
+/* 文章底部標籤與資訊 */
+.article-footer-info {
+  margin-top: 48px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border-color);
+}
+
+.article-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.article-tags span {
+  font-size: 0.85rem;
+  color: var(--primary-color, #107c41);
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.article-tags span:hover {
+  border-color: var(--primary-color, #107c41);
+  background-color: var(--bg-main);
+}
