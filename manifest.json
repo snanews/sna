@@ -1,0 +1,21 @@
+{
+  "name": "松山新聞社 SNA",
+  "short_name": "SNA",
+  "description": "松山新聞社官方網站與新聞編輯後台",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1b5e20",
+  "icons": [
+    {
+      "src": "./images/pwa-icon.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "./images/pwa-icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

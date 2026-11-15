@@ -124,6 +124,20 @@ function renderHeader() {
 
   // 3. 註冊後台與編輯器按鈕的密碼驗證彈窗事件
   setupAdminAuthModal(basePath);
+
+  // 自動在網頁 <head> 注入 PWA Manifest 與行動裝置主題色
+  if (!document.getElementById("pwa-manifest-link")) {
+    const manifestLink = document.createElement("link");
+    manifestLink.id = "pwa-manifest-link";
+    manifestLink.rel = "manifest";
+    manifestLink.href = `${basePath}manifest.json`;
+    document.head.appendChild(manifestLink);
+
+    const themeColorMeta = document.createElement("meta");
+    themeColorMeta.name = "theme-color";
+    themeColorMeta.content = "#1b5e20";
+    document.head.appendChild(themeColorMeta);
+  }
 }
 
 // 密碼驗證彈窗與安全性邏輯（支援多個後台入口）
@@ -302,4 +316,21 @@ function initThemeSwitcher() {
       localStorage.setItem("theme", newTheme);
     });
   }
+}
+
+// 自動註冊 Service Worker
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    // 根據是否為子頁面動態決定 sw.js 的相對路徑
+    const currentPath = window.location.pathname;
+    const isSubPage = currentPath.includes("/admin/") ||
+      currentPath.includes("/articles/") ||
+      currentPath.includes("/html/") ||
+      currentPath.includes("/editor/");
+    const swPath = isSubPage ? "../sw.js" : "./sw.js";
+
+    navigator.serviceWorker.register(swPath)
+      .then((reg) => console.log('Service Worker 註冊成功:', reg.scope))
+      .catch((err) => console.log('Service Worker 註冊失敗:', err));
+  });
 }
