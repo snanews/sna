@@ -8,6 +8,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   await loadComponent("site-header-container", "../components/header.html");
   await loadComponent("site-footer-container", "../components/footer.html");
 
+  renderHeader();
   initThemeSwitcher();
   initSideDrawer();
 
@@ -22,6 +23,30 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   }
 });
+
+// 共用組件載入函式
+async function loadComponent(containerId, filePath) {
+  try {
+    const response = await fetch(filePath);
+    if (!response.ok) throw new Error(`無法載入 ${filePath}`);
+    const html = await response.text();
+    const container = document.getElementById(containerId);
+    if (container) {
+      container.innerHTML = html;
+      if (containerId === "site-footer-container") {
+        const footerLinks = container.querySelectorAll("a");
+        footerLinks.forEach(link => {
+          const href = link.getAttribute("href");
+          if (href && href === "index.html") {
+            link.setAttribute("href", "../index.html");
+          }
+        });
+      }
+    }
+  } catch (error) {
+    console.error("載入組件失敗:", error);
+  }
+}
 
 // 自動調整 textarea 高度的通用函式
 function autoResizeTextarea(textarea) {
