@@ -111,13 +111,16 @@ async function loadExistingArticleToEditor(articleId) {
     if (article) {
       console.log("成功找到既有文章，正在載入編輯器:", article);
       
+      // 鎖定文章編號欄位，避免編輯時意外更動 ID
+      const idInput = document.getElementById("article_id");
+      idInput.readOnly = true;
+      idInput.style.opacity = "0.7";
+      idInput.style.cursor = "not-allowed";
+
       document.getElementById("title").value = article.title || "";
       document.getElementById("category").value = article.category || "自治";
       document.getElementById("author").value = article.author || "SNA 新聞組";
       document.getElementById("cover_image").value = article.cover_image || "";
-      
-      const shortIdInput = document.getElementById("short_id_hidden");
-      if (shortIdInput) shortIdInput.value = article.short_code || "";
 
       const container = document.getElementById("blocks-container");
       container.innerHTML = "";
@@ -136,18 +139,98 @@ async function loadExistingArticleToEditor(articleId) {
 
       showModal({
         title: "讀取成功",
-        desc: `已成功載入文章「${article.title}」，您可以直接修改內容並更新。`,
+        desc: `已成功載入文章「${article.title}」。<br>文章編號已鎖定，您僅可修改標題、分類、作者、縮圖與內文。`,
         showCancel: false,
         confirmText: "確定"
       });
     } else {
-      console.log("找不到此 ID 的文章，將視為新文章建立。");
+      showModal({
+        title: "查無此文章",
+        desc: `找不到編號為「${articleId}」的文章，請確認編號是否輸入正確。`,
+        showCancel: false,
+        confirmText: "確定"
+      });
     }
 
     finishLoadingBar();
   } catch (error) {
     console.error("載入文章發生錯誤:", error);
     errorLoadingBar();
+  }
+}
+
+// 執行更新至 GAS 的核心邏輯（原地覆寫模式）
+async function executeUpdate() {
+  showModal({ title: "更新中...", desc: "正在同步修改內容至原儲存格，請稍候...", showCancel: false });
+
+  const id = document.getElementById("article_id").value.trim();
+  const title = document.getElementById("title").value.trim();
+  const category = document.getElementById("category").value;
+  const author = document.getElementById("author").value.trim();
+  const cover_image = document.getElementById("cover_image").value.trim();
+
+  try {
+    const blockElements = document.querySelectorAll(".block-item");
+    const layoutBlocks = [];
+
+    blockElements.forEach(el => {
+      const type = el.dataset.type;
+      if (type === 'text') {
+        const content = el.querySelector("textarea").value;
+        if (content) layoutBlocks.push({ type: "text", content });
+      } else if (type === 'image') {
+        const url = el.querySelector(".img-url").value;
+        const caption = el.querySelector(".img-caption").value;
+        if (url) layoutBlocks.push({ type: "image", url, caption });
+      } else if (type === 'quote') {
+        const content = el.querySelector(".quote-content").value;
+        const author = el.querySelector(".quote-author").value;
+        if (content) layoutBlocks.push({ type: "quote", content, author });
+      }
+    });
+
+    if (layoutBlocks.length === 0) {
+      showModal({ title: "提示", desc: "請至少保留一個有內容的積木！", showCancel: false });
+      return;
+    }
+
+    // 僅傳送 update 指令、定位用的 id，以及允許修改的 5 個欄位
+    const payload = {
+      action: "update",
+      id,
+      title,
+      category,
+      author,
+      cover_image,
+      layout_json: JSON.stringify(layoutBlocks)
+    };
+
+    const res = await fetch(GAS_API_URL, {
+      method: "POST",
+      redirect: "follow",
+      body: JSON.stringify(payload)
+    });
+    const result = await res.json();
+
+    if (result.status === "success") {
+      localStorage.removeItem("sna_articles_cache");
+      showModal({
+        title: "更新成功",
+        desc: `文章內容已原地更新完成！`,
+        showCancel: false,
+        confirmText: "確定",
+        onConfirm: () => {
+          closeModal();
+          window.location.href = "../html/all_articles.html";
+        }
+      });
+    } else {
+      showModal({ title: "更新失敗", desc: result.message || "未知錯誤", showCancel: false });
+    }
+
+  } catch (err) {
+    console.error(err);
+    showModal({ title: "連線異常", desc: "無法連線至 GAS 後台，請檢查網路或 API 設定。", showCancel: false });
   }
 }
 
