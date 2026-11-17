@@ -26,11 +26,22 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   }
 
-  // 4. 綁定表單提交（更新文章）事件
+  // 4. 綁定封面圖片輸入框的 Google 雲端硬碟連結自動轉換
+  const coverInput = document.getElementById("cover_image");
+  if (coverInput) {
+    coverInput.addEventListener("blur", function () {
+      this.value = convertGoogleDriveLink(this.value);
+    });
+  }
+
+  // 5. 綁定表單提交（更新文章）事件
   const form = document.getElementById("article-form");
   if (form) {
     form.addEventListener("submit", handleFormSubmitClick);
   }
+
+  // 6. 初始化區塊容器的拖曳排序與圖片網址自動轉換監聽
+  initBlocksContainerInteractions();
 
   // 預設一開始給一個空白段落積木
   addBlock('text');
@@ -72,8 +83,8 @@ async function loadComponent(containerId, filePath) {
 
 // 自動調整 textarea 高度的通用函式
 function autoResizeTextarea(textarea) {
-  textarea.style.height = 'auto'; // 先重設高度以正確計算內容高度
-  textarea.style.height = (textarea.scrollHeight + 2) + 'px'; // 依據實際內容高度設定
+  textarea.style.height = 'auto';
+  textarea.style.height = (textarea.scrollHeight + 2) + 'px';
 }
 
 // 核心功能：根據輸入的 ID 讀取既有文章資料並還原到表單與積木中
@@ -140,7 +151,7 @@ async function loadExistingArticleToEditor(articleId) {
   }
 }
 
-// 動態新增積木（具備自動調整高度與標準樣式）
+// 動態新增積木（具備自動調整高度、拖曳排序與雲端硬碟圖片支援）
 function addBlock(type, data = {}) {
   const container = document.getElementById("blocks-container");
   const blockId = 'block_' + Date.now() + Math.random().toString(36).substring(2, 7);
@@ -148,18 +159,19 @@ function addBlock(type, data = {}) {
   div.className = "block-item";
   div.dataset.type = type;
   div.id = blockId;
+  div.draggable = true; // 開啟拖曳功能
 
   let typeName = "文字段落";
   if (type === 'image') typeName = "圖片積木";
   if (type === 'quote') typeName = "引言積木";
 
   let innerHTML = `
-    <div class="block-header">
-      <span>[ ${typeName} ]</span>
-      <div>
-        <button type="button" class="block-drag-handle" title="上下移動" style="background:none; border:none; cursor:grab; color:var(--text-muted); font-weight:bold; font-size:1.1rem; padding:0 6px;">☰</button>
-        <button type="button" class="btn btn-danger" onclick="document.getElementById('${blockId}').remove()">移除</button>
+    <div class="block-header" style="display: flex; align-items: center; justify-content: space-between;">
+      <div style="display: flex; align-items: center;">
+        <button type="button" class="block-drag-handle" title="按住拖曳排序" style="background:none; border:none; cursor:grab; color:var(--text-muted); font-weight:bold; font-size:1.1rem; padding:0 6px; margin-right:4px;">☰</button>
+        <span>[ ${typeName} ]</span>
       </div>
+      <button type="button" class="btn btn-danger" onclick="document.getElementById('${blockId}').remove()">移除</button>
     </div>
   `;
 
@@ -169,7 +181,7 @@ function addBlock(type, data = {}) {
     `;
   } else if (type === 'image') {
     innerHTML += `
-      <input type="url" class="form-control img-url" placeholder="圖片網址 URL" value="${escapeHtml(data.url || '')}" style="margin-bottom: 10px;">
+      <input type="url" class="form-control img-url" placeholder="圖片網址 URL (支援 Google 雲端硬碟自動轉換)" value="${escapeHtml(data.url || '')}" style="margin-bottom: 10px;">
       <input type="text" class="form-control img-caption" placeholder="圖片說明文字 (Caption)" value="${escapeHtml(data.caption || '')}">
     `;
   } else if (type === 'quote') {
@@ -182,6 +194,15 @@ function addBlock(type, data = {}) {
   div.innerHTML = innerHTML;
   container.appendChild(div);
 
+  // 綁定積木拖曳事件
+  div.addEventListener('dragstart', () => {
+    div.classList.add('dragging');
+  });
+
+  div.addEventListener('dragend', () => {
+    div.classList.remove('dragging');
+  });
+
   // 自動綁定 textarea 高度調整事件並初始化高度
   const textareas = div.querySelectorAll('.auto-resize');
   textareas.forEach(textarea => {
@@ -192,6 +213,37 @@ function addBlock(type, data = {}) {
       autoResizeTextarea(this);
     });
   });
+}
+
+// 初始化積木容器的拖曳放置與圖片連結自動轉換監聽
+function initBlocksContainerInteractions() {
+  const container = document.getElementById("blocks-container");
+  if (!container) return;
+
+  container.addEventListener('dragover', e => {
+    e.preventDefault();
+    const draggingItem = document.querySelector('.dragging');
+    if (!draggingItem) return;
+    const siblings = [...container.querySelectorAll('.block-item:not(.dragging)')];
+
+    const nextSibling = siblings.find(sibling => {
+      const box = sibling.getBoundingClientRect();
+      return e.clientY <= box.top + box.height / 2;
+    });
+
+    if (nextSibling) {
+      container.insertBefore(draggingItem, nextSibling);
+    } else {
+      container.appendChild(draggingItem);
+    }
+  });
+
+  // 監聽圖片積木網址欄位的 blur 事件，自動轉換 Google 雲端硬碟連結
+  container.addEventListener("blur", function (e) {
+    if (e.target && e.target.classList.contains("img-url")) {
+      e.target.value = convertGoogleDriveLink(e.target.value);
+    }
+  }, true);
 }
 
 // 點擊送出時，跳出高質感確認彈窗
@@ -286,41 +338,36 @@ async function executeUpdate() {
 
 // 智慧分段彈窗相關邏輯
 function openSmartSplitModal() {
-  let smartModal = document.getElementById("smart-split-modal");
-  if (!smartModal) {
-    smartModal = document.createElement("div");
-    smartModal.className = "modal-overlay";
-    smartModal.id = "smart-split-modal";
-    smartModal.innerHTML = `
-      <div class="modal-box" style="max-width: 500px;">
-        <div class="modal-title">智慧貼上與分段</div>
-        <div class="modal-desc" style="text-align: left !important; line-height: 1.6 !important;">請將完整文章貼於下方。系統將會自動以「換行」為單位，將每一段文字獨立轉化為文字段落積木。</div>
-        <textarea id="smart-paste-text" class="form-control" rows="8" placeholder="在此貼上文章內容..."></textarea>
-        <div class="modal-actions" style="margin-top: 20px;">
-          <button type="button" class="btn btn-secondary" onclick="document.getElementById('smart-split-modal').classList.remove('active')">取消</button>
-          <button type="button" class="btn btn-primary" onclick="processSmartSplit()">確認生成積木</button>
-        </div>
-      </div>
-    `;
-    document.body.appendChild(smartModal);
-  }
-  smartModal.classList.add("active");
-  document.getElementById("smart-paste-text").value = "";
+  showModal({
+    title: "智慧貼上與分段",
+    desc: `請將記事本中的整篇新聞貼在下方。系統會自動以空白行（段落間隔）為您切開，並自動建立對應的多個文字積木：<br><br>
+      <textarea id="smart-paste-text" class="form-control" rows="8" placeholder="在此貼上整篇新聞內容..." style="resize: vertical;"></textarea>
+    `,
+    showCancel: true,
+    confirmText: "確認自動分段",
+    onConfirm: executeSmartSplit
+  });
 }
 
-function processSmartSplit() {
-  const text = document.getElementById("smart-paste-text").value;
-  if (!text.trim()) {
-    alert("請先輸入或貼上文字！");
+function executeSmartSplit() {
+  const rawText = document.getElementById("smart-paste-text").value;
+  if (!rawText.trim()) {
+    alert("請先輸入或貼上文章內容！");
     return;
   }
 
-  const paragraphs = text.split(/\r?\n+/).map(p => p.trim()).filter(p => p.length > 0);
-  paragraphs.forEach(p => {
-    addBlock('text', { content: p });
+  const paragraphs = rawText.split(/\n\s*\n/).map(p => p.trim()).filter(p => p.length > 0);
+
+  if (paragraphs.length === 0) {
+    alert("沒有偵測到有效段落。");
+    return;
+  }
+
+  paragraphs.forEach(text => {
+    addBlock('text', { content: text });
   });
 
-  document.getElementById("smart-split-modal").classList.remove("active");
+  closeModal();
 }
 
 // 控制自訂置中彈窗的顯示
@@ -350,6 +397,25 @@ function showModal({ title, desc, showCancel, confirmText = "確定", onConfirm 
 
 function closeModal() {
   document.getElementById("custom-modal").classList.remove("active");
+}
+
+// Google 雲端硬碟圖片共用連結轉換
+function convertGoogleDriveLink(url) {
+  if (!url) return url;
+  let fileId = "";
+  const matchD = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+  const matchIdParam = url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+
+  if (matchD && matchD[1]) {
+    fileId = matchD[1];
+  } else if (matchIdParam && matchIdParam[1]) {
+    fileId = matchIdParam[1];
+  }
+
+  if (fileId) {
+    return `https://lh3.googleusercontent.com/d/${fileId}`;
+  }
+  return url;
 }
 
 // 深淺色模式切換
