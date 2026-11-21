@@ -20,14 +20,21 @@
   <link rel="stylesheet" href="../css/article.css">
   <!-- 直接共用 admin.css 樣式 -->
   <link rel="stylesheet" href="../css/administration.css">
+
+  <style>
+    /* 尚未通過權限驗證時先隱藏主內容，避免未授權畫面短暫閃現 */
+    .auth-pending #protected-content {
+      display: none;
+    }
+  </style>
 </head>
 
-<body>
+<body class="auth-pending">
 
   <!-- 頁首容器：由 ../components/header.js 動態渲染 -->
   <header id="site-header-container" class="site-header"></header>
 
-  <main class="container admin-container">
+  <main id="protected-content" class="container admin-container">
     <div class="admin-header-box">
       <h1 class="admin-title">SNA 新聞編輯後台</h1>
       <p class="admin-desc">輸入文章編號可自動讀取既有內容與積木進行修改，資料將同步更新至雲端試算表。</p>
@@ -84,7 +91,11 @@
         </div>
       </div>
 
-      <button type="submit" class="btn btn-primary submit-btn-override">確認送出並更新文章</button>
+      <div style="display: flex; gap: 12px; align-items: stretch; margin-top: 20px;">
+        <button type="button" class="btn btn-secondary" onclick="confirmClearBlocks()"
+          style="flex: 0 0 auto; padding: 14px 24px; white-space: nowrap;">清空積木</button>
+        <button type="submit" class="btn btn-primary submit-btn-override" style="flex: 1;">確認送出並更新文章</button>
+      </div>
     </form>
   </main>
 
@@ -97,14 +108,29 @@
     </div>
   </div>
 
-  <!-- 載入共用導覽列模組 -->
-  <script src="../components/header.js"></script>
-
   <!-- 頁尾容器 -->
   <footer id="site-footer-container" class="site-footer"></footer>
 
-  <!-- 編輯器專屬邏輯控制碼 -->
+  <!-- 載入共用導覽列模組與編輯器專屬邏輯 -->
+  <script src="../components/header.js"></script>
   <script src="editor.js"></script>
+
+  <!-- 頁面進入權限守衛（需在 header.js 載入後執行） -->
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      if (typeof requireAdminAuth === "function") {
+        requireAdminAuth({
+          allowCancelRedirectHome: true,
+          homePath: "../index.html",
+          onSuccess: () => {
+            document.body.classList.remove("auth-pending");
+          }
+        });
+      } else {
+        document.body.classList.remove("auth-pending");
+      }
+    });
+  </script>
 </body>
 
 </html>

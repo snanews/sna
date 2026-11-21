@@ -358,3 +358,7 @@ button[onclick="openSmartSplitModal()"]:hover {
 #smart-paste-text::-webkit-scrollbar-thumb:hover {
   background: var(--text-muted);
 }
+
+html {
+  overflow-y: scroll;
+}

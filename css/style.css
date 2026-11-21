@@ -68,6 +68,7 @@ a {
 }
 
 .top-bar {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -93,6 +94,12 @@ a {
 }
 
 .site-logo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-align: center;
+  white-space: nowrap;
   font-size: 1.25rem;
   font-weight: 700;
   letter-spacing: 0.5px;
@@ -101,6 +108,8 @@ a {
 .header-actions {
   display: flex;
   align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
 }
 
 .theme-toggle-btn {
@@ -141,6 +150,21 @@ a {
 .category-tab:hover {
   color: #ffffff;
   background-color: var(--accent-color);
+}
+
+.site-logo-img {
+  height: 24px;
+  width: auto;
+  max-width: 72px;
+  object-fit: contain;
+  flex-shrink: 0;
+  display: block;
+}
+
+[data-theme="dark"] .site-logo-img {
+  background-color: rgba(255, 255, 255, 0.92);
+  padding: 2px 6px;
+  border-radius: 5px;
 }
 
 /* ==========================================================================
@@ -607,4 +631,8 @@ a {
     width: 160px; /* 電腦版改回較寬的原始比例 */
     height: 115px;
   }
+}
+
+html {
+  overflow-y: scroll;
 }

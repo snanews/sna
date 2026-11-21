@@ -110,8 +110,27 @@ function renderRecommendedArticles(articles) {
   const container = document.getElementById("recommended-container");
   if (!container || articles.length === 0) return;
 
-  const sorted = [...articles].sort((a, b) => Number(b.views || 0) - Number(a.views || 0));
-  const topArticles = sorted.slice(0, 4);
+  const ONE_MONTH_MS = 30 * 24 * 60 * 60 * 1000;
+  const oneMonthAgo = Date.now() - ONE_MONTH_MS;
+
+  const byViewsDesc = (a, b) => Number(b.views || 0) - Number(a.views || 0);
+
+  // 1. 先抓一個月內的新聞，依觀看數由高到低排序
+  const recentArticles = articles
+    .filter(item => parseDate(item.publish_date) >= oneMonthAgo)
+    .sort(byViewsDesc);
+
+  let topArticles = recentArticles.slice(0, 4);
+
+  // 2. 若一個月內的新聞不足 4 篇，再往前抓更早的新聞依觀看數補齊
+  if (topArticles.length < 4) {
+    const usedIds = new Set(topArticles.map(item => String(item.id)));
+    const olderArticles = articles
+      .filter(item => !usedIds.has(String(item.id)) && parseDate(item.publish_date) < oneMonthAgo)
+      .sort(byViewsDesc);
+
+    topArticles = topArticles.concat(olderArticles.slice(0, 4 - topArticles.length));
+  }
 
   container.innerHTML = topArticles.map(item => {
     const coverImg = item.cover_image && item.cover_image.trim() !== "" ? item.cover_image : "images/icon.jpg";
@@ -131,7 +150,10 @@ function renderRightsArticles(articles) {
   const container = document.getElementById("rights-container");
   if (!container) return;
 
-  const rightsList = articles.filter(item => item.category === "學權");
+  // 只篩選「學權」分類，並依發布日期由新到舊排序（不看點閱率）
+  const rightsList = articles
+    .filter(item => item.category === "學權")
+    .sort((a, b) => parseDate(b.publish_date) - parseDate(a.publish_date));
 
   if (rightsList.length === 0) {
     container.innerHTML = `<p style="font-size: 0.9rem; color: var(--text-muted); padding: 8px 0;">目前尚無學權專區報導。</p>`;

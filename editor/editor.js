@@ -42,9 +42,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // 6. 初始化區塊容器的拖曳排序與圖片網址自動轉換監聽
   initBlocksContainerInteractions();
-
-  // 預設一開始給一個空白段落積木
-  addBlock('text');
 });
 
 // 共用組件載入函式
@@ -96,21 +93,21 @@ async function loadExistingArticleToEditor(articleId) {
     if (cachedData) {
       const parsed = JSON.parse(cachedData);
       const articles = parsed.articles || [];
-      article = articles.find(item => String(item.id) === String(articleId));
+      article = articles.find(item => String(item.id).trim() === String(articleId).trim());
     }
 
     if (!article) {
       const response = await fetch(GAS_API_URL);
       const result = await response.json();
       if (result.status === "success" && result.articles) {
-        article = result.articles.find(item => String(item.id) === String(articleId));
+        article = result.articles.find(item => String(item.id).trim() === String(articleId).trim());
         localStorage.setItem("sna_articles_cache", JSON.stringify(result));
       }
     }
 
     if (article) {
       console.log("成功找到既有文章，正在載入編輯器:", article);
-      
+
       // 鎖定文章編號欄位，避免編輯時意外更動 ID
       const idInput = document.getElementById("article_id");
       idInput.readOnly = true;
@@ -159,81 +156,6 @@ async function loadExistingArticleToEditor(articleId) {
   }
 }
 
-// 執行更新至 GAS 的核心邏輯（原地覆寫模式）
-async function executeUpdate() {
-  showModal({ title: "更新中...", desc: "正在同步修改內容至原儲存格，請稍候...", showCancel: false });
-
-  const id = document.getElementById("article_id").value.trim();
-  const title = document.getElementById("title").value.trim();
-  const category = document.getElementById("category").value;
-  const author = document.getElementById("author").value.trim();
-  const cover_image = document.getElementById("cover_image").value.trim();
-
-  try {
-    const blockElements = document.querySelectorAll(".block-item");
-    const layoutBlocks = [];
-
-    blockElements.forEach(el => {
-      const type = el.dataset.type;
-      if (type === 'text') {
-        const content = el.querySelector("textarea").value;
-        if (content) layoutBlocks.push({ type: "text", content });
-      } else if (type === 'image') {
-        const url = el.querySelector(".img-url").value;
-        const caption = el.querySelector(".img-caption").value;
-        if (url) layoutBlocks.push({ type: "image", url, caption });
-      } else if (type === 'quote') {
-        const content = el.querySelector(".quote-content").value;
-        const author = el.querySelector(".quote-author").value;
-        if (content) layoutBlocks.push({ type: "quote", content, author });
-      }
-    });
-
-    if (layoutBlocks.length === 0) {
-      showModal({ title: "提示", desc: "請至少保留一個有內容的積木！", showCancel: false });
-      return;
-    }
-
-    // 僅傳送 update 指令、定位用的 id，以及允許修改的 5 個欄位
-    const payload = {
-      action: "update",
-      id,
-      title,
-      category,
-      author,
-      cover_image,
-      layout_json: JSON.stringify(layoutBlocks)
-    };
-
-    const res = await fetch(GAS_API_URL, {
-      method: "POST",
-      redirect: "follow",
-      body: JSON.stringify(payload)
-    });
-    const result = await res.json();
-
-    if (result.status === "success") {
-      localStorage.removeItem("sna_articles_cache");
-      showModal({
-        title: "更新成功",
-        desc: `文章內容已原地更新完成！`,
-        showCancel: false,
-        confirmText: "確定",
-        onConfirm: () => {
-          closeModal();
-          window.location.href = "../html/all_articles.html";
-        }
-      });
-    } else {
-      showModal({ title: "更新失敗", desc: result.message || "未知錯誤", showCancel: false });
-    }
-
-  } catch (err) {
-    console.error(err);
-    showModal({ title: "連線異常", desc: "無法連線至 GAS 後台，請檢查網路或 API 設定。", showCancel: false });
-  }
-}
-
 // 動態新增積木（具備自動調整高度、拖曳排序與雲端硬碟圖片支援）
 function addBlock(type, data = {}) {
   const container = document.getElementById("blocks-container");
@@ -242,7 +164,7 @@ function addBlock(type, data = {}) {
   div.className = "block-item";
   div.dataset.type = type;
   div.id = blockId;
-  div.draggable = true; // 開啟拖曳功能
+  div.draggable = true;
 
   let typeName = "文字段落";
   if (type === 'image') typeName = "圖片積木";
@@ -277,7 +199,6 @@ function addBlock(type, data = {}) {
   div.innerHTML = innerHTML;
   container.appendChild(div);
 
-  // 綁定積木拖曳事件
   div.addEventListener('dragstart', () => {
     div.classList.add('dragging');
   });
@@ -286,7 +207,6 @@ function addBlock(type, data = {}) {
     div.classList.remove('dragging');
   });
 
-  // 自動綁定 textarea 高度調整事件並初始化高度
   const textareas = div.querySelectorAll('.auto-resize');
   textareas.forEach(textarea => {
     if (textarea.value) {
@@ -321,7 +241,6 @@ function initBlocksContainerInteractions() {
     }
   });
 
-  // 監聽圖片積木網址欄位的 blur 事件，自動轉換 Google 雲端硬碟連結
   container.addEventListener("blur", function (e) {
     if (e.target && e.target.classList.contains("img-url")) {
       e.target.value = convertGoogleDriveLink(e.target.value);
@@ -329,31 +248,32 @@ function initBlocksContainerInteractions() {
   }, true);
 }
 
-// 點擊送出時，跳出高質感確認彈窗
+// 點擊送出時，跳出確認彈窗
 function handleFormSubmitClick(e) {
   e.preventDefault();
-  const title = document.getElementById("title").value;
-  const articleId = document.getElementById("article_id").value;
+  const title = document.getElementById("title").value.trim();
+  const articleId = document.getElementById("article_id").value.trim();
 
   showModal({
     title: "確認更新文章",
-    desc: `您即將更新文章：<br><strong>「${title}」</strong><br>(編號: ${articleId})<br><br>確定要將變更同步至雲端試算表嗎？`,
+    desc: `您即將更新文章：<br><strong>「${title}」</strong><br>(編號: ${articleId})<br><br>確定要將變更原地同步至雲端試算表嗎？`,
     showCancel: true,
     confirmText: "確認更新",
     onConfirm: executeUpdate
   });
 }
 
-// 執行更新至 GAS 的核心邏輯
+// 執行更新至 GAS 的核心邏輯（原地覆寫模式，更新後留在編輯頁）
 async function executeUpdate() {
-  showModal({ title: "更新中...", desc: "正在同步資料至雲端資料庫，請稍候...", showCancel: false });
+  showModal({ title: "更新中...", desc: "正在同步修改內容至原儲存格，請稍候...", showCancel: false });
+  startLoadingBar();
 
-  const id = document.getElementById("article_id").value;
-  const title = document.getElementById("title").value;
+  const id = document.getElementById("article_id").value.trim();
+  const title = document.getElementById("title").value.trim();
   const category = document.getElementById("category").value;
-  const author = document.getElementById("author").value;
-  const cover_image = document.getElementById("cover_image").value;
-  const short_code = document.getElementById("short_id_hidden") ? document.getElementById("short_id_hidden").value : "";
+  const author = document.getElementById("author").value.trim();
+  const cover_image = convertGoogleDriveLink(document.getElementById("cover_image").value.trim());
+  document.getElementById("cover_image").value = cover_image;
 
   try {
     const blockElements = document.querySelectorAll(".block-item");
@@ -365,25 +285,27 @@ async function executeUpdate() {
         const content = el.querySelector("textarea").value;
         if (content) layoutBlocks.push({ type: "text", content });
       } else if (type === 'image') {
-        const url = el.querySelector(".img-url").value;
+        const url = convertGoogleDriveLink(el.querySelector(".img-url").value.trim());
         const caption = el.querySelector(".img-caption").value;
         if (url) layoutBlocks.push({ type: "image", url, caption });
       } else if (type === 'quote') {
         const content = el.querySelector(".quote-content").value;
-        const author = el.querySelector(".quote-author").value;
-        if (content) layoutBlocks.push({ type: "quote", content, author });
+        const authorField = el.querySelector(".quote-author").value;
+        if (content) layoutBlocks.push({ type: "quote", content, author: authorField });
       }
     });
 
     if (layoutBlocks.length === 0) {
-      showModal({ title: "提示", desc: "請至少新增一個有內容的積木！", showCancel: false });
+      errorLoadingBar();
+      showModal({ title: "提示", desc: "請至少保留一個有內容的積木！", showCancel: false });
       return;
     }
 
+    // 明確帶上 action: "update"，僅傳送允許修改的欄位
     const payload = {
+      action: "update",
       id,
       title,
-      short_code,
       category,
       author,
       cover_image,
@@ -399,22 +321,24 @@ async function executeUpdate() {
 
     if (result.status === "success") {
       localStorage.removeItem("sna_articles_cache");
+      finishLoadingBar();
       showModal({
         title: "更新成功",
-        desc: `文章已成功同步至雲端試算表！`,
+        desc: `文章內容已原地更新完成！您可以繼續留在編輯頁面調整內容。`,
         showCancel: false,
         confirmText: "確定",
         onConfirm: () => {
           closeModal();
-          window.location.href = "../html/all_articles.html";
         }
       });
     } else {
+      errorLoadingBar();
       showModal({ title: "更新失敗", desc: result.message || "未知錯誤", showCancel: false });
     }
 
   } catch (err) {
     console.error(err);
+    errorLoadingBar();
     showModal({ title: "連線異常", desc: "無法連線至 GAS 後台，請檢查網路或 API 設定。", showCancel: false });
   }
 }
@@ -586,4 +510,35 @@ function errorLoadingBar() {
   if (!bar) return;
   bar.style.backgroundColor = "#e74c3c";
   finishLoadingBar();
+}
+
+// 點擊「清空積木」時先跳出確認彈窗，防止誤觸
+function confirmClearBlocks() {
+  const container = document.getElementById("blocks-container");
+  if (!container || container.children.length === 0) {
+    showModal({
+      title: "提示",
+      desc: "目前沒有任何積木可以清空。",
+      showCancel: false,
+      confirmText: "確定"
+    });
+    return;
+  }
+
+  showModal({
+    title: "確認清空所有積木",
+    desc: "確定要清空目前編輯區內的所有段落、圖片與引言積木嗎？此動作無法復原。",
+    showCancel: true,
+    confirmText: "確定清空",
+    onConfirm: executeClearBlocks
+  });
+}
+
+// 執行清空積木（完全移除所有積木）
+function executeClearBlocks() {
+  const container = document.getElementById("blocks-container");
+  if (container) {
+    container.innerHTML = "";
+  }
+  closeModal();
 }

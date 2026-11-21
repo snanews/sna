@@ -1,5 +1,5 @@
 // 你的 Google Apps Script Web App 部署完整網址
-const GAS_API_URL = "https://script.google.com/macros/s/AKfycbzvdZebFO9zsqGfxw3ROM36rB5KfOWwuQ7G7AShSh0FpqgsGKpEENwf3-BUw1QmnbQ/exec";
+const GAS_API_URL = "https://script.google.com/macros/s/AKfycbzvdZebFO9zsqGfxw3ROM36rB5KfOWwuQ7G7AShSh0FpqgsGKpEENwf3-BUw1QmnbQ/exec"; //[cite: 12]
 
 document.addEventListener("DOMContentLoaded", async () => {
   console.log("SNA 文章內頁初始化中...");
@@ -11,6 +11,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   renderHeader();
   initThemeSwitcher();
   initSideDrawer();
+  renderCopyLinkButton();
+  
 
   // 2. 取得網址列的 id 參數並載入文章內容
   const urlParams = new URLSearchParams(window.location.search);
@@ -43,6 +45,7 @@ async function loadComponent(containerId, filePath) {
 async function fetchAndRenderArticle(articleId) {
   const cachedData = localStorage.getItem("sna_articles_cache");
   let foundInCache = false;
+  let activeArticle = null;
 
   if (cachedData) {
     try {
@@ -51,6 +54,7 @@ async function fetchAndRenderArticle(articleId) {
       const cachedArticle = articles.find(item => String(item.id) === String(articleId));
 
       if (cachedArticle) {
+        activeArticle = cachedArticle;
         renderArticleHeader(cachedArticle);
         renderArticleBlocks(cachedArticle.layout_json);
         foundInCache = true;
@@ -67,8 +71,13 @@ async function fetchAndRenderArticle(articleId) {
     const result = await response.json();
 
     if (result.status !== "success") {
-      if (!foundInCache) showErrorState("無法取得資料庫文章清單");
-      errorLoadingBar();
+      if (!foundInCache) {
+        showErrorState("無法取得資料庫文章清單");
+        errorLoadingBar();
+        return;
+      }
+      finishLoadingBar();
+      scheduleArticleViewCount(articleId, activeArticle);
       return;
     }
 
@@ -78,22 +87,132 @@ async function fetchAndRenderArticle(articleId) {
     const article = articles.find(item => String(item.id) === String(articleId));
 
     if (!article) {
-      if (!foundInCache) showErrorState("找不到此篇文章，可能已被移除或網址有誤。");
-      errorLoadingBar();
+      if (!foundInCache) {
+        showErrorState("找不到此篇文章，可能已被移除或網址有誤。");
+        errorLoadingBar();
+        return;
+      }
+      finishLoadingBar();
+      scheduleArticleViewCount(articleId, activeArticle);
       return;
     }
 
+    activeArticle = article;
     renderArticleHeader(article);
     renderArticleBlocks(article.layout_json);
     finishLoadingBar();
+
+    // 確認文章已成功載入後，啟動停留防跳出與背景回報點閱計數
+    scheduleArticleViewCount(articleId, activeArticle);
 
   } catch (error) {
     console.error("載入文章發生錯誤:", error);
     if (!foundInCache) {
       showErrorState("連線至資料庫發生異常，請稍後再試。");
+      errorLoadingBar();
+      return;
     }
-    errorLoadingBar();
+    finishLoadingBar();
+    scheduleArticleViewCount(articleId, activeArticle);
   }
+}
+
+// 點閱率防秒跳出、去重與非阻塞回報邏輯
+function scheduleArticleViewCount(articleId, articleObj) {
+  if (!articleId || !articleObj) return;
+  if (window.__snaViewTrackerBound === String(articleId)) return;
+  window.__snaViewTrackerBound = String(articleId);
+
+  const sessionKey = `sna_viewed_${articleId}`;
+  if (sessionStorage.getItem(sessionKey)) return;
+
+  const DWELL_TIME_MS = 6000; // 停留滿 6 秒才算有效閱讀
+  let qualified = false;
+  let optimisticallyUpdated = false;
+  let sent = false;
+
+  function applyOptimisticViewIncrement() {
+    if (optimisticallyUpdated) return;
+    optimisticallyUpdated = true;
+
+    const currentViews = Number(articleObj.views || 0);
+    const nextViews = currentViews + 1;
+    articleObj.views = nextViews;
+    renderArticleHeader(articleObj);
+
+    // 同步更新 localStorage 快取中的 views，讓回首頁或切分頁時也能看到最新數字
+    const cachedRaw = localStorage.getItem("sna_articles_cache");
+    if (cachedRaw) {
+      try {
+        const parsed = JSON.parse(cachedRaw);
+        if (Array.isArray(parsed.articles)) {
+          parsed.articles = parsed.articles.map(item =>
+            String(item.id) === String(articleId) ? { ...item, views: nextViews } : item
+          );
+          localStorage.setItem("sna_articles_cache", JSON.stringify(parsed));
+        }
+      } catch (e) {
+        console.warn("更新快取點閱數失敗:", e);
+      }
+    }
+  }
+
+  function flushViewToBackend() {
+    if (!qualified || sent) return;
+    sent = true;
+    sessionStorage.setItem(sessionKey, "1");
+
+    const payload = JSON.stringify({
+      action: "increment_view",
+      id: String(articleId).trim()
+    });
+
+    if (navigator.sendBeacon) {
+      const blob = new Blob([payload], { type: "text/plain;charset=utf-8" });
+      navigator.sendBeacon(GAS_API_URL, blob);
+    } else {
+      fetch(GAS_API_URL, {
+        method: "POST",
+        redirect: "follow",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: payload,
+        keepalive: true
+      }).catch(() => {});
+    }
+  }
+
+  let timer = setTimeout(() => {
+    qualified = true;
+    applyOptimisticViewIncrement();
+    if (document.visibilityState === "hidden") {
+      flushViewToBackend();
+    }
+  }, DWELL_TIME_MS);
+
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "hidden") {
+      if (!qualified) {
+        // 若在 6 秒內就切走或縮起視窗，取消計時（視為跳出）
+        clearTimeout(timer);
+      } else {
+        flushViewToBackend();
+      }
+    } else if (document.visibilityState === "visible" && !qualified && !sent) {
+      // 若使用者很快又切回來且尚未達標，重新起算停留時間
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+        qualified = true;
+        applyOptimisticViewIncrement();
+      }, DWELL_TIME_MS);
+    }
+  });
+
+  window.addEventListener("pagehide", () => {
+    clearTimeout(timer);
+    if (qualified) {
+      flushViewToBackend();
+    }
+  });
 }
 
 // A. 渲染文章頂部詮釋資料
@@ -102,12 +221,12 @@ function renderArticleHeader(article) {
 
   const categoryEl = document.getElementById("article-category");
   const titleEl = document.getElementById("article-title");
-  const metaEl = document.getElementById("article-meta");
+  const metaInfoEl = document.getElementById("article-meta-info");
 
   if (categoryEl) categoryEl.textContent = article.category || "未分類";
   if (titleEl) titleEl.textContent = article.title || "無標題";
-  if (metaEl) {
-    metaEl.textContent = `${article.publish_date || ''} · ${article.author || 'SNA 編輯組'}${article.views ? ` · 點閱 ${article.views} 次` : ''}`;
+  if (metaInfoEl) {
+    metaInfoEl.textContent = `${article.publish_date || ''} · ${article.author || 'SNA 編輯組'}${article.views ? ` · 點閱 ${article.views} 次` : ''}`;
   }
 }
 
@@ -209,4 +328,81 @@ function errorLoadingBar() {
   if (!bar) return;
   bar.style.backgroundColor = "#e74c3c";
   finishLoadingBar();
+}
+
+async function copyTextToClipboard(text) {
+  if (navigator.clipboard && window.isSecureContext) {
+    await navigator.clipboard.writeText(text);
+    return true;
+  }
+
+  const textarea = document.createElement("textarea");
+  textarea.value = text;
+  textarea.setAttribute("readonly", "");
+  textarea.style.position = "fixed";
+  textarea.style.opacity = "0";
+  document.body.appendChild(textarea);
+  textarea.select();
+
+  let copied = false;
+  try {
+    copied = document.execCommand("copy");
+  } finally {
+    document.body.removeChild(textarea);
+  }
+  return copied;
+}
+
+function renderCopyLinkButton(containerId = "article-share-container") {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+
+  container.innerHTML = "";
+
+  const btn = document.createElement("button");
+  btn.type = "button";
+  btn.className = "copy-link-btn";
+  btn.setAttribute("aria-label", "複製文章連結");
+
+  const linkIconSvg = `
+    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+      <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+    </svg>
+  `;
+
+  const checkIconSvg = `
+    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <polyline points="20 6 9 17 4 12"></polyline>
+    </svg>
+  `;
+
+  btn.innerHTML = `${linkIconSvg}<span class="copy-link-text">複製連結</span>`;
+
+  let resetTimer = null;
+
+  btn.addEventListener("click", async () => {
+    const shareUrl = window.location.href;
+    const textEl = btn.querySelector(".copy-link-text");
+
+    try {
+      const ok = await copyTextToClipboard(shareUrl);
+      if (!ok) throw new Error("copy failed");
+
+      btn.classList.add("is-copied");
+      btn.innerHTML = `${checkIconSvg}<span class="copy-link-text">已複製連結</span>`;
+    } catch (err) {
+      btn.classList.remove("is-copied");
+      btn.innerHTML = `${linkIconSvg}<span class="copy-link-text">複製失敗</span>`;
+    }
+
+    if (resetTimer) clearTimeout(resetTimer);
+    resetTimer = setTimeout(() => {
+      btn.classList.remove("is-copied");
+      btn.innerHTML = `${linkIconSvg}<span class="copy-link-text">複製連結</span>`;
+      if (textEl) textEl.textContent = "複製連結";
+    }, 2000);
+  });
+
+  container.appendChild(btn);
 }

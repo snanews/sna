@@ -1,4 +1,4 @@
-const CACHE_NAME = 'sna-app-v1';
+const CACHE_NAME = 'sna-app-v6';
 const urlsToCache = [
   './index.html',
   './css/style.css',
@@ -7,10 +7,14 @@ const urlsToCache = [
 ];
 
 // 安裝 Service Worker 並快取核心檔案
-self.addEventListener('install', (event) => {
+self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(urlsToCache);
+    caches.keys().then((cacheNames) => {
+      return Promise.all(
+        cacheNames
+          .filter((name) => name !== CACHE_NAME)
+          .map((name) => caches.delete(name))
+      );
     })
   );
 });
