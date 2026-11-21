@@ -555,7 +555,7 @@ function applyHeaderLogoStyle() {
   logoImg.style.objectFit = "contain";
   logoImg.style.display = "inline-block";
   logoImg.style.alignSelf = "flex-end";
-  logoImg.style.transform = "translateY(-6.3px)";
+  logoImg.style.transform = "translateY(-7px)";
   logoImg.style.backgroundColor = "transparent";
   logoImg.style.padding = "0";
   logoImg.style.borderRadius = "0";
