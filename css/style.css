@@ -636,3 +636,16 @@ a {
 html {
   overflow-y: scroll;
 }
+
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--primary-color, #107c41);
+  outline-offset: 2px;
+}
