@@ -67,16 +67,16 @@ function renderHeader() {
         <span id="left-install-spacer" aria-hidden="true" style="display: inline-block; width: 0px; height: 36px; flex: 0 0 auto; pointer-events: none;"></span>
       </div>
 
-      <a href="${basePath}index.html" class="site-logo" style="flex: 1; text-align: center; white-space: nowrap; display: inline-flex; align-items: center; justify-content: center; gap: 8px;">
-      <img
-        src="${basePath}images/sna-logo.png"
-        alt="SNA"
-        width="47"
-        height="17"
-        class="site-logo-img"
-        style="width: 47px; height: 17px; min-width: 47px; max-width: 47px; flex: 0 0 47px; object-fit: contain; display: block;"
-      >
-        <span>松山新聞社</span>
+      <a href="${basePath}index.html" class="site-logo" style="flex: 1; text-align: center; white-space: nowrap; display: inline-flex; align-items: flex-end; justify-content: center; gap: 8px;">
+        <img
+          src="${basePath}images/sna-logo.png"
+          alt="SNA"
+          width="47"
+          height="17"
+          class="site-logo-img"
+          style="width: 47px; height: 17px; min-width: 47px; max-width: 47px; flex: 0 0 47px; object-fit: contain; display: inline-block;"
+        >
+        <span class="site-logo-text">松山新聞社</span>
       </a>
 
       <div class="header-actions" id="header-right-actions" style="display: flex; align-items: center; gap: 6px;">
@@ -540,10 +540,13 @@ function syncLeftInstallSpacer() {
 }
 
 function applyHeaderLogoStyle() {
+  const logoLink = document.querySelector(".site-logo");
   const logoImg = document.querySelector(".site-logo-img");
+  const logoText = document.querySelector(".site-logo-text");
   if (!logoImg) return;
 
   const isDark = document.documentElement.getAttribute("data-theme") === "dark";
+  const isMobile = window.innerWidth <= 768;
   const fixedHeight = 17;
   const fixedWidth = 47;
 
@@ -554,15 +557,27 @@ function applyHeaderLogoStyle() {
   logoImg.style.flex = `0 0 ${fixedWidth}px`;
   logoImg.style.objectFit = "contain";
   logoImg.style.display = "inline-block";
-  logoImg.style.alignSelf = "flex-end";
-  logoImg.style.transform = "translateY(-7px)";
+  logoImg.style.alignSelf = isMobile ? "center" : "flex-end";
+  logoImg.style.transform = isMobile ? "translateY(0)" : "translateY(-6.3px)";
   logoImg.style.backgroundColor = "transparent";
   logoImg.style.padding = "0";
   logoImg.style.borderRadius = "0";
   logoImg.style.filter = isDark
     ? "brightness(0) invert(1)"
     : "brightness(0)";
+
+  if (logoText) {
+    logoText.style.display = isMobile ? "none" : "inline";
+  }
+
+  if (logoLink) {
+    logoLink.style.gap = isMobile ? "0px" : "8px";
+  }
 }
+
+window.addEventListener("resize", () => {
+  applyHeaderLogoStyle();
+});
 
 function centerHeaderBrandGroup() {
   const logoLink = document.querySelector(".site-logo");

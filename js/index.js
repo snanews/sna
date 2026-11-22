@@ -37,42 +37,43 @@ async function fetchAndRenderHomeData() {
     try {
       const parsed = JSON.parse(cachedData);
       renderFeaturedArticle(parsed.articles || []);
+      renderLatestArticles(parsed.articles || []);
       renderRecommendedArticles(parsed.articles || []);
       renderRightsArticles(parsed.articles || []);
       renderAnnouncements(parsed.announcements || []);
     } catch (e) {
       console.warn("讀取快取資料失敗", e);
     }
-  }
 
-  startLoadingBar();
+    startLoadingBar();
 
-  try {
-    const response = await fetch(GAS_API_URL);
-    const result = await response.json();
+    try {
+      const response = await fetch(GAS_API_URL);
+      const result = await response.json();
 
-    if (result.status === "success") {
-      const articles = result.articles || [];
-      const announcements = result.announcements || [];
+      if (result.status === "success") {
+        const articles = result.articles || [];
+        const announcements = result.announcements || [];
 
-      localStorage.setItem("sna_articles_cache", JSON.stringify(result));
+        localStorage.setItem("sna_articles_cache", JSON.stringify(result));
 
-      renderFeaturedArticle(articles);
-      renderRecommendedArticles(articles);
-      renderRightsArticles(articles);
-      renderAnnouncements(announcements);
+        renderFeaturedArticle(articles);
+        renderLatestArticles(articles);
+        renderRecommendedArticles(articles);
+        renderRightsArticles(articles);
+        renderAnnouncements(announcements);
 
-      finishLoadingBar();
-    } else {
-      console.error("API 回傳狀態異常", result.message);
+        finishLoadingBar();
+      } else {
+        console.error("API 回傳狀態異常", result.message);
+        errorLoadingBar();
+      }
+    } catch (error) {
+      console.error("無法取得試算表資料", error);
       errorLoadingBar();
     }
-  } catch (error) {
-    console.error("無法取得試算表資料", error);
-    errorLoadingBar();
   }
 }
-
 // 標準化日期解析函式（可完美處理帶有 "·" 或多餘空白的日期字串）
 const parseDate = (dateStr) => {
   if (!dateStr) return 0;
@@ -80,11 +81,18 @@ const parseDate = (dateStr) => {
   return new Date(cleanStr).getTime() || 0;
 };
 
+
 function renderFeaturedArticle(articles) {
   const container = document.getElementById("featured-container");
-  if (!container || articles.length === 0) return;
+  if (!container || !Array.isArray(articles) || articles.length === 0) return;
 
-  const sorted = [...articles].sort((a, b) => parseDate(b.publish_date) - parseDate(a.publish_date));
+  const eligibleArticles = articles.filter(isFeaturedAllowed);
+  if (eligibleArticles.length === 0) {
+    container.innerHTML = "";
+    return;
+  }
+
+  const sorted = [...eligibleArticles].sort((a, b) => parseDate(b.publish_date) - parseDate(a.publish_date));
   const latest = sorted[0];
 
   // 如果沒有 cover_image，就帶入預設的 images/icon.jpg
@@ -174,16 +182,35 @@ function renderRightsArticles(articles) {
   }).join('');
 }
 
+function escapeHtml(str) {
+  return String(str ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
 function renderAnnouncements(announcements) {
   const container = document.getElementById("announcement-container");
-  if (!container || announcements.length === 0) return;
+  if (!container || !Array.isArray(announcements) || announcements.length === 0) return;
 
-  container.innerHTML = announcements.map(item => `
-    <div class="announcement-item">
-      <span class="announcement-date">${item.date}</span>
-      <a href="${item.link_url || '#'}" class="announcement-title">${item.title}</a>
-    </div>
-  `).join('');
+  container.innerHTML = announcements.map(item => {
+    const rawUrl = item.link_url != null ? String(item.link_url).trim() : "";
+    const hasLink = rawUrl !== "" && rawUrl !== "#";
+    const safeTitle = escapeHtml(item.title || "");
+
+    const titleHtml = hasLink
+      ? `<a href="${escapeHtml(rawUrl)}" class="announcement-title">${safeTitle}</a>`
+      : `<span class="announcement-title announcement-no-link">${safeTitle}</span>`;
+
+    return `
+      <div class="announcement-item">
+        <span class="announcement-date">${escapeHtml(item.date || "")}</span>
+        ${titleHtml}
+      </div>
+    `;
+  }).join('');
 }
 
 function startLoadingBar() {
@@ -213,4 +240,43 @@ function errorLoadingBar() {
   if (!bar) return;
   bar.style.backgroundColor = "#e74c3c";
   finishLoadingBar();
+}
+
+function isFeaturedAllowed(article) {
+  const val = article?.is_featured;
+  if (val === false || val === 0) return false;
+  if (typeof val === "string") {
+    const normalized = val.trim().toUpperCase();
+    if (normalized === "FALSE" || normalized === "0" || normalized === "否" || normalized === "N" || normalized === "NO") {
+      return false;
+    }
+  }
+  return true;
+}
+
+function renderLatestArticles(articles) {
+  const container = document.getElementById("latest-container");
+  if (!container || !Array.isArray(articles)) return;
+
+  if (articles.length === 0) {
+    container.innerHTML = `<p style="font-size: 0.9rem; color: var(--text-muted); padding: 8px 0;">目前尚無最新新聞。</p>`;
+    return;
+  }
+
+  const latestList = [...articles]
+    .sort((a, b) => parseDate(b.publish_date) - parseDate(a.publish_date))
+    .slice(0, 6);
+
+  container.innerHTML = latestList.map(item => {
+    const coverImg = item.cover_image && item.cover_image.trim() !== "" ? item.cover_image : "images/icon.jpg";
+    return `
+      <article class="news-card">
+        <img src="${coverImg}" alt="縮圖" class="news-card-img">
+        <div class="news-card-body">
+          <h3 class="news-card-title"><a href="articles/index.html?id=${item.id}">${item.title}</a></h3>
+          <span class="news-card-meta">${item.publish_date} · ${item.author || 'SNA 新聞組'}</span>
+        </div>
+      </article>
+    `;
+  }).join('');
 }

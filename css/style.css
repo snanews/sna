@@ -29,10 +29,14 @@
   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.5);
 }
 
+/* ==========================================================================
+   2. 全域重設與基礎元素 (Base & Reset)
+   ========================================================================== */
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+  -webkit-tap-highlight-color: transparent;
 }
 
 body {
@@ -40,12 +44,26 @@ body {
   background-color: var(--bg-primary);
   color: var(--text-primary);
   line-height: 1.6;
+  overflow-x: clip;
   transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+body.drawer-open {
+  overflow: hidden;
 }
 
 a {
   color: inherit;
   text-decoration: none;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--accent-color);
+  outline-offset: 2px;
 }
 
 .container {
@@ -56,7 +74,7 @@ a {
 }
 
 /* ==========================================================================
-   3. 頁首與導覽列 (Header & Category Bar)
+   3. 頁首、導覽列與讀取進度條 (Header, Navigation & Loading Bar)
    ========================================================================== */
 .site-header {
   position: sticky;
@@ -67,7 +85,8 @@ a {
   transition: background-color 0.3s ease;
 }
 
-.top-bar {
+.top-bar,
+.header-inner {
   position: relative;
   display: flex;
   align-items: center;
@@ -76,13 +95,14 @@ a {
   padding: 0 16px;
 }
 
-.menu-btn {
+.menu-btn,
+.theme-toggle-btn {
   background: none;
   border: none;
+  color: var(--text-primary);
   cursor: pointer;
   padding: 8px;
-  color: var(--text-primary);
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
 }
@@ -94,6 +114,9 @@ a {
 }
 
 .site-logo {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -105,6 +128,21 @@ a {
   letter-spacing: 0.5px;
 }
 
+.site-logo-img {
+  height: 24px;
+  width: auto;
+  max-width: 72px;
+  object-fit: contain;
+  flex-shrink: 0;
+  display: block;
+}
+
+[data-theme="dark"] .site-logo-img {
+  background-color: rgba(255, 255, 255, 0.92);
+  padding: 2px 6px;
+  border-radius: 5px;
+}
+
 .header-actions {
   display: flex;
   align-items: center;
@@ -112,13 +150,11 @@ a {
   gap: 6px;
 }
 
-.theme-toggle-btn {
-  background: none;
-  border: none;
-  color: var(--text-primary);
-  cursor: pointer;
-  padding: 8px;
-  display: flex;
+#install-btn,
+.download-btn {
+  min-width: 36px;
+  min-height: 36px;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
 }
@@ -152,23 +188,43 @@ a {
   background-color: var(--accent-color);
 }
 
-.site-logo-img {
-  height: 24px;
-  width: auto;
-  max-width: 72px;
-  object-fit: contain;
-  flex-shrink: 0;
-  display: block;
+/* 頂部動態讀取進度條（已向下位移 3px） */
+.top-loading-bar-container {
+  position: absolute;
+  bottom: -3px;
+  left: 0;
+  width: 100%;
+  height: 5px;
+  background-color: transparent;
+  overflow: hidden;
+  z-index: 101;
 }
 
-[data-theme="dark"] .site-logo-img {
-  background-color: rgba(255, 255, 255, 0.92);
-  padding: 2px 6px;
-  border-radius: 5px;
+.top-loading-bar {
+  width: 0%;
+  height: 100%;
+  background-color: var(--accent-color);
+  box-shadow: 0 0 10px var(--accent-color);
+  transition: width 0.3s ease, opacity 0.3s ease;
+  opacity: 0;
+}
+
+.top-loading-bar.loading {
+  opacity: 1;
+}
+
+@keyframes loading-pulse {
+  0% { opacity: 0.7; }
+  50% { opacity: 1; }
+  100% { opacity: 0.7; }
+}
+
+.top-loading-bar.loading-pulse {
+  animation: loading-pulse 1.2s infinite ease-in-out;
 }
 
 /* ==========================================================================
-   4. 區塊通用樣式 (Section Layout)
+   4. 首頁主內容與區塊通用樣式 (Home Sections & Hero)
    ========================================================================== */
 .section-block {
   margin: 32px 0;
@@ -184,9 +240,6 @@ a {
   padding-left: 8px;
 }
 
-/* ==========================================================================
-   5. 本週焦點新聞 (Featured Hero Section)
-   ========================================================================== */
 .featured-card {
   position: relative;
   border-radius: 12px;
@@ -248,12 +301,24 @@ a {
 }
 
 /* ==========================================================================
-   6. 文章卡片與清單 (所有報導頁面專用 - 單列大卡片版型)
+   5. 文章卡片與列表網格 (Article Cards & Grids)
    ========================================================================== */
 .news-grid {
   display: grid;
   grid-template-columns: 1fr;
   gap: 20px;
+}
+
+.home-news-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+@media (min-width: 768px) {
+  .home-news-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 .news-card {
@@ -278,7 +343,7 @@ a {
 
 .news-card-img {
   width: 110px;
-  height: 115px;
+  height: 90px;
   border-radius: 8px;
   object-fit: cover;
   background-color: var(--bg-secondary);
@@ -309,6 +374,10 @@ a {
   z-index: 1;
 }
 
+.news-card-desc {
+  display: none;
+}
+
 .news-card-meta {
   font-size: 0.8rem;
   color: var(--text-muted);
@@ -317,82 +386,66 @@ a {
   pointer-events: none;
 }
 
-/* 讓「所有新聞報導」頁面中的卡片上下保持完美的空隙 */
+/* 單列列表頁面間距 */
 .single-news-list .news-card {
-  margin-bottom: 16px; /* 這裡可以自由調整間距大小，例如 16px 或 20px */
+  margin-bottom: 16px;
 }
 
-/* 確保最後一張卡片下方不需要多餘的外距 */
 .single-news-list .news-card:last-child {
   margin-bottom: 0;
 }
 
-/* 讓首頁維持雙欄網格 */
-.home-news-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 16px;
+/* 首頁雙欄精簡卡片微調 */
+.home-news-grid .news-card {
+  padding: 10px 12px;
+  gap: 12px;
+  align-items: center;
 }
 
-@media (min-width: 768px) {
-  .home-news-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
+.home-news-grid .news-card-img {
+  width: 100px;
+  height: 75px;
+  border-radius: 6px;
 }
 
-/* 讓首頁橫向卡片的右側文字區塊能夠上下撐開，讓標題在上方、資訊在最下方 */
 .home-news-grid .news-card-body {
-  display: flex !important;
-  flex-direction: column !important;
-  justify-content: space-between !important;
-  height: 100% !important;
+  height: 100%;
 }
 
-/* 確保標題與下方資訊之間有漂亮的分配 */
 .home-news-grid .news-card-title {
-  font-size: 0.95rem !important;
-  font-weight: 600 !important;
-  line-height: 1.4 !important;
-  margin-bottom: 4px !important;
+  font-size: 0.95rem;
+  line-height: 1.4;
+  margin-bottom: 4px;
 }
 
 .home-news-grid .news-card-meta {
-  font-size: 0.75rem !important;
-  color: var(--text-muted) !important;
-  margin-top: auto !important;
+  font-size: 0.75rem;
+  margin-top: auto;
 }
 
-/* 將首頁卡片的圖片尺寸縮小，讓卡片更緊湊、不空曠 */
-.home-news-grid .news-card-img {
-  width: 100px !important;
-  height: 75px !important;
-  border-radius: 6px !important;
-  object-fit: cover !important;
-  flex-shrink: 0 !important;
-}
-
-/* 確保卡片整體的內距與高度也跟著精簡 */
-.home-news-grid .news-card {
-  padding: 10px 12px !important;
-  gap: 12px !important;
-  align-items: center !important;
-}
-
-/* ==========================================================================
-   6-1. 首頁專用網格 (雙列排版)
-   ========================================================================== */
-.home-news-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 16px;
-}
-
+/* 桌機版列表預覽摘要與縮圖比例 */
 @media (min-width: 768px) {
-  .home-news-grid {
-    grid-template-columns: repeat(2, 1fr);
+  .news-card-desc {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    line-height: 1.4;
+    margin: 4px 0;
+  }
+
+  .news-card-img {
+    width: 160px;
+    height: 115px;
   }
 }
 
+/* ==========================================================================
+   6. 公告專區 (Announcements)
+   ========================================================================== */
 .announcement-list {
   background-color: var(--bg-card);
   border: 1px solid var(--border-color);
@@ -425,27 +478,21 @@ a {
   color: var(--text-primary);
 }
 
-/* ==========================================================================
-   7. 頁尾 (Footer)
-   ========================================================================== */
-.site-footer {
-  margin-top: 60px;
-  padding: 30px 16px;
-  background-color: var(--bg-secondary);
-  border-top: 1px solid var(--border-color);
-  text-align: center;
-  font-size: 0.85rem;
-  color: var(--text-muted);
+.announcement-title.announcement-no-link {
+  cursor: default;
+  pointer-events: none;
+  text-decoration: none;
+  color: var(--text-primary);
 }
 
 /* ==========================================================================
-   9. 左側抽屜選單 (Side Drawer & Overlay)
+   7. 左側抽屜選單 (Side Drawer & Overlay)
    ========================================================================== */
 .drawer-overlay {
   position: fixed;
   top: 0;
   left: 0;
-  width: 100vw;
+  width: 100%;
   height: 100vh;
   background-color: rgba(0, 0, 0, 0.5);
   z-index: 200;
@@ -560,92 +607,14 @@ a {
 }
 
 /* ==========================================================================
-   頂部動態讀取進度條（已依要求向下位移 3px）
+   8. 頁尾 (Footer)
    ========================================================================== */
-.top-loading-bar-container {
-  position: absolute;
-  bottom: -3px;
-  left: 0;
-  width: 100%;
-  height: 5px;
-  background-color: transparent;
-  overflow: hidden;
-  z-index: 101;
-}
-
-.top-loading-bar {
-  width: 0%;
-  height: 100%;
-  background-color: var(--accent-color);
-  box-shadow: 0 0 10px var(--accent-color);
-  transition: width 0.3s ease, opacity 0.3s ease;
-  opacity: 0;
-}
-
-.top-loading-bar.loading {
-  opacity: 1;
-}
-
-@keyframes loading-pulse {
-  0% { opacity: 0.7; }
-  50% { opacity: 1; }
-  100% { opacity: 0.7; }
-}
-
-.top-loading-bar.loading-pulse {
-  animation: loading-pulse 1.2s infinite ease-in-out;
-}
-
-/* ==========================================
-   所有新聞列表頁：手機與電腦版排版適配
-   ========================================== */
-
-/* 1. 手機版預設：隱藏預覽內文，圖片維持輕巧比例 */
-.news-card-desc {
-  display: none; 
-}
-
-.news-card-img {
-  width: 110px;
-  height: 90px;
-  object-fit: cover;
-  border-radius: 8px;
-  flex-shrink: 0;
-}
-
-/* 2. 電腦版 (螢幕寬度 768px 以上)：顯示灰色預覽內文、恢復圖片原始較寬比例 */
-@media (min-width: 768px) {
-  .news-card-desc {
-    display: -webkit-box;
-    -webkit-line-clamp: 2; /* 最多顯示 2 行，保持卡片高度一致 */
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    font-size: 0.85rem;
-    color: var(--text-secondary); /* 確保顏色是灰色而非白色 */
-    line-height: 1.4;
-    margin: 4px 0;
-  }
-
-  .news-card-img {
-    width: 160px; /* 電腦版改回較寬的原始比例 */
-    height: 115px;
-  }
-}
-
-html {
-  overflow-y: scroll;
-}
-
-* {
-  -webkit-tap-highlight-color: transparent;
-}
-
-button:focus-visible,
-a:focus-visible,
-input:focus-visible,
-select:focus-visible,
-textarea:focus-visible {
-  outline: 2px solid var(--primary-color, #107c41);
-  outline-offset: 2px;
+.site-footer {
+  margin-top: 60px;
+  padding: 30px 16px;
+  background-color: var(--bg-secondary);
+  border-top: 1px solid var(--border-color);
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--text-muted);
 }

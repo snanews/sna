@@ -119,6 +119,16 @@ async function loadExistingArticleToEditor(articleId) {
       document.getElementById("author").value = article.author || "SNA 新聞組";
       document.getElementById("cover_image").value = article.cover_image || "";
 
+      const featuredInput = document.getElementById("is_featured");
+      if (featuredInput) {
+        const val = article.is_featured;
+        const isHidden =
+          val === false ||
+          val === 0 ||
+          (typeof val === "string" && ["FALSE", "0", "否", "N", "NO"].includes(val.trim().toUpperCase()));
+        featuredInput.checked = !isHidden;
+      }
+
       const container = document.getElementById("blocks-container");
       container.innerHTML = "";
 
@@ -301,6 +311,9 @@ async function executeUpdate() {
       return;
     }
 
+    const featuredInput = document.getElementById("is_featured");
+    const is_featured = featuredInput ? featuredInput.checked : true;
+
     // 明確帶上 action: "update"，僅傳送允許修改的欄位
     const payload = {
       action: "update",
@@ -309,6 +322,7 @@ async function executeUpdate() {
       category,
       author,
       cover_image,
+      is_featured,
       layout_json: JSON.stringify(layoutBlocks)
     };
 

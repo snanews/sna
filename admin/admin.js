@@ -195,53 +195,55 @@ function handleFormSubmitClick(e) {
 
 // 執行發布至 GAS 的核心邏輯
 async function executePublish() {
-  showModal({ title: "發布中...", desc: "正在計算短代碼並上傳至雲端資料庫，請稍候...", showCancel: false }); //[span_90](start_span)[span_90](end_span)
-  startLoadingBar(); //[span_91](start_span)[span_91](end_span)
+  showModal({ title: "發布中...", desc: "正在計算短代碼並上傳至雲端資料庫，請稍候...", showCancel: false });
+  startLoadingBar();
 
-  const id = document.getElementById("article_id").value.trim(); //[span_92](start_span)[span_92](end_span)
-  const title = document.getElementById("title").value.trim(); //[span_93](start_span)[span_93](end_span)
-  const category = document.getElementById("category").value; //[span_94](start_span)[span_94](end_span)
-  const author = document.getElementById("author").value.trim(); //[span_95](start_span)[span_95](end_span)
+  const id = document.getElementById("article_id").value.trim();
+  const title = document.getElementById("title").value.trim();
+  const category = document.getElementById("category").value;
+  const author = document.getElementById("author").value.trim();
   const coverInput = document.getElementById("cover_image");
   const cover_image = convertGoogleDriveLink(coverInput ? coverInput.value.trim() : "");
   if (coverInput) coverInput.value = cover_image;
+  const featuredInput = document.getElementById("is_featured");
+  const is_featured = featuredInput ? featuredInput.checked : true;
 
   try {
-    const resCheck = await fetch(GAS_API_URL); //[span_96](start_span)[span_96](end_span)
-    const resultCheck = await resCheck.json(); //[span_97](start_span)[span_97](end_span)
-    const articles = (resultCheck.status === "success" && resultCheck.articles) ? resultCheck.articles : []; //[span_98](start_span)[span_98](end_span)
+    const resCheck = await fetch(GAS_API_URL);
+    const resultCheck = await resCheck.json();
+    const articles = (resultCheck.status === "success" && resultCheck.articles) ? resultCheck.articles : [];
 
-    const now = new Date(); //[span_99](start_span)[span_99](end_span)
-    const yearFull = now.getFullYear(); //[span_100](start_span)[span_100](end_span)
-    const yearShort = String(yearFull).slice(-2); //[span_101](start_span)[span_101](end_span)
+    const now = new Date();
+    const yearFull = now.getFullYear();
+    const yearShort = String(yearFull).slice(-2);
 
     const currentYearArticles = articles.filter(item => {
-      return item.publish_date && item.publish_date.startsWith(String(yearFull)); //[span_102](start_span)[span_102](end_span)
+      return item.publish_date && item.publish_date.startsWith(String(yearFull));
     });
-    const sequenceNum = currentYearArticles.length + 1; //[span_103](start_span)[span_103](end_span)
-    const short_id = yearShort + String(sequenceNum).padStart(3, "0"); //[span_104](start_span)[span_104](end_span)
+    const sequenceNum = currentYearArticles.length + 1;
+    const short_id = yearShort + String(sequenceNum).padStart(3, "0");
 
-    const pad = (n) => String(n).padStart(2, "0"); //[span_105](start_span)[span_105](end_span)
-    const publish_date = `${yearFull}/${pad(now.getMonth() + 1)}/${pad(now.getDate())} · ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`; //[span_106](start_span)[span_106](end_span)
+    const pad = (n) => String(n).padStart(2, "0");
+    const publish_date = `${yearFull}/${pad(now.getMonth() + 1)}/${pad(now.getDate())} · ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
 
-    const blockElements = document.querySelectorAll(".block-item"); //[span_107](start_span)[span_107](end_span)
-    const layoutBlocks = []; //[span_108](start_span)[span_108](end_span)
+    const blockElements = document.querySelectorAll(".block-item");
+    const layoutBlocks = [];
 
     blockElements.forEach(el => {
-      const type = el.dataset.type; //[span_109](start_span)[span_109](end_span)
-      if (type === "text") { //[span_110](start_span)[span_110](end_span)
-        const content = el.querySelector("textarea").value; //[span_111](start_span)[span_111](end_span)
-        if (content) layoutBlocks.push({ type: "text", content }); //[span_112](start_span)[span_112](end_span)
-      } else if (type === "image") { //[span_113](start_span)[span_113](end_span)
+      const type = el.dataset.type;
+      if (type === "text") {
+        const content = el.querySelector("textarea").value;
+        if (content) layoutBlocks.push({ type: "text", content });
+      } else if (type === "image") {
         const imgUrlInput = el.querySelector(".img-url");
         const url = convertGoogleDriveLink(imgUrlInput ? imgUrlInput.value.trim() : "");
         if (imgUrlInput) imgUrlInput.value = url;
-        const caption = el.querySelector(".img-caption").value; //[span_114](start_span)[span_114](end_span)
-        if (url) layoutBlocks.push({ type: "image", url, caption }); //[span_115](start_span)[span_115](end_span)
-      } else if (type === "quote") { //[span_116](start_span)[span_116](end_span)
-        const content = el.querySelector(".quote-content").value; //[span_117](start_span)[span_117](end_span)
-        const quoteAuthor = el.querySelector(".quote-author").value; //[span_118](start_span)[span_118](end_span)
-        if (content) layoutBlocks.push({ type: "quote", content, author: quoteAuthor }); //[span_119](start_span)[span_119](end_span)
+        const caption = el.querySelector(".img-caption").value;
+        if (url) layoutBlocks.push({ type: "image", url, caption });
+      } else if (type === "quote") {
+        const content = el.querySelector(".quote-content").value;
+        const quoteAuthor = el.querySelector(".quote-author").value;
+        if (content) layoutBlocks.push({ type: "quote", content, author: quoteAuthor });
       }
     });
 
@@ -252,21 +254,22 @@ async function executePublish() {
       category,
       author,
       cover_image,
+      is_featured,
       publish_date,
       views: 0,
       layout_json: JSON.stringify(layoutBlocks)
-    }; //[span_120](start_span)[span_120](end_span)
+    };
 
     const res = await fetch(GAS_API_URL, {
       method: "POST",
       redirect: "follow",
       body: JSON.stringify(payload)
-    }); //[span_121](start_span)[span_121](end_span)
-    const result = await res.json(); //[span_122](start_span)[span_122](end_span)
+    });
+    const result = await res.json();
 
     if (result.status === "success") {
       localStorage.removeItem("sna_articles_cache");
-      finishLoadingBar(); //[span_123](start_span)[span_123](end_span)
+      finishLoadingBar();
       showModal({
         title: "發布成功",
         desc: `文章已成功寫入試算表！<br>短代碼: ${short_id}<br>時間: ${publish_date}`,
@@ -274,19 +277,20 @@ async function executePublish() {
         confirmText: "確定",
         onConfirm: () => {
           document.getElementById("article-form").reset();
+          if (featuredInput) featuredInput.checked = true;
           document.getElementById("blocks-container").innerHTML = "";
           addBlock("text");
           closeModal();
         }
-      }); //[span_124](start_span)[span_124](end_span)
+      });
     } else {
-      errorLoadingBar(); //[span_125](start_span)[span_125](end_span)
-      showModal({ title: "發布失敗", desc: result.message || "未知錯誤", showCancel: false }); //[span_126](start_span)[span_126](end_span)
+      errorLoadingBar();
+      showModal({ title: "發布失敗", desc: result.message || "未知錯誤", showCancel: false });
     }
   } catch (err) {
-    console.error(err); //[span_127](start_span)[span_127](end_span)
-    errorLoadingBar(); //[span_128](start_span)[span_128](end_span)
-    showModal({ title: "連線異常", desc: "無法連線至 GAS 後台，請檢查網路或 API 設定。", showCancel: false }); //[span_129](start_span)[span_129](end_span)
+    console.error(err);
+    errorLoadingBar();
+    showModal({ title: "連線異常", desc: "無法連線至 GAS 後台，請檢查網路或 API 設定。", showCancel: false });
   }
 }
 

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'sna-app-v6';
+const CACHE_NAME = 'sna-app-v7';
 const urlsToCache = [
   './index.html',
   './css/style.css',
