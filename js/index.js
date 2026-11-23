@@ -265,7 +265,7 @@ function renderLatestArticles(articles) {
 
   const latestList = [...articles]
     .sort((a, b) => parseDate(b.publish_date) - parseDate(a.publish_date))
-    .slice(0, 6);
+    .slice(0, 4);
 
   container.innerHTML = latestList.map(item => {
     const coverImg = item.cover_image && item.cover_image.trim() !== "" ? item.cover_image : "images/icon.jpg";
