@@ -126,7 +126,7 @@ function scheduleArticleViewCount(articleId, articleObj) {
   const sessionKey = `sna_viewed_${articleId}`;
   if (sessionStorage.getItem(sessionKey)) return;
 
-  const DWELL_TIME_MS = 6000; // 停留滿 6 秒才算有效閱讀
+  const DWELL_TIME_MS = 3500; // 停留滿 3.5 秒才算有效閱讀
   let qualified = false;
   let optimisticallyUpdated = false;
   let sent = false;
